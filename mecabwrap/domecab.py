@@ -13,7 +13,7 @@ def do_mecab(x, *args, outpath=None):
     :param outpath:  None or a valid file path
     :param *args:    options of mecab; see `mecab --help`
     
-    :return:        if not successful, error message is returned;
+    :return:         if not successful, error message is returned;
                      if successful and outpath is not given, then
                      mecab outcome is returned as bytes;
                      if successful and outpath is givem then
@@ -83,26 +83,14 @@ def do_mecab_iter(x, *args, byline=False):
     :param byline:   if true, generator yields one line at at time;
                      otherwise, it yields a chunk up to 'EOS' at a time
     
-    :return:        generator of mecab outcomes
+    :return:         generator of mecab outcomes
     """
-
-    # write x to a temp file
-    _, infile = mkstemp()
-    with open(infile, "wt") as f:
-        for txt in x:
-            f.write(txt + '\n')
 
     # make a temp file for writing output
     _, ofile = mkstemp()
 
-    # call mecab
-    command = ['mecab', infile, '-o', ofile, *args]
-    p = subprocess.Popen(command, 
-                         stdin=subprocess.PIPE, 
-                         stdout=subprocess.PIPE)
-    p.communicate()
-    p.terminate()
-    os.remove(infile)
+    do_mecab_vec(x, *args, outpath=ofile)
+
 
     with open(ofile, 'rt') as f:
         if byline:
