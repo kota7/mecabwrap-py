@@ -40,18 +40,50 @@ def do_mecab(x, *args, outpath=None):
     return out
 
 
+def do_mecab_vec(x, *args, outpath=None):
+    """
+    call mecab with multiple inputs 
+    
+    :param x:       iterable
+    :param *args:   options to mecab; see `mecab --help`
+    :param outpath: if None, outcome is returned as a combined binary string;
+                    if str indiccating a valid file path, 
+                    the outcome is written to the file
+    :return:        a binary string of output of mecab call
+    """
+
+    # write x to a temp file
+    _, infile = mkstemp()
+    with open(infile, "wt") as f:
+        for txt in x:
+            f.write(txt + '\n')
+
+    # call mecab
+    command = ['mecab', infile, *args]
+    if outpath is not None:
+        command += ['-o', outpath]
+
+    p = subprocess.Popen(command, 
+                         stdin=subprocess.PIPE, 
+                         stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    p.terminate()
+    os.remove(infile)
+    
+    return out 
+
 
 
 def do_mecab_iter(x, *args, byline=False):
     """
-    call mecab with multiple inputs one by one
+    call mecab with multiple inputs and get results one by one
 
     :param x:        iterable
     :param *args:    options to mecab; see `mecab --help`
     :param byline:   if true, generator yields one line at at time;
                      otherwise, it yields a chunk up to 'EOS' at a time
     
-    :return"        generator of mecab outcomes
+    :return:        generator of mecab outcomes
     """
 
     # write x to a temp file
