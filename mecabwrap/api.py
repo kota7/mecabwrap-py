@@ -49,7 +49,7 @@ def tokenize(x):
 
     :param x:   string
 
-    :return:   generator of tokens
+    :return:    generator of tokens
     """
 
     o = do_mecab(x).decode().split('\n')
