@@ -4,6 +4,7 @@
 import unittest
 import re
 from mecabwrap.domecab import do_mecab
+from mecabwrap.domecab import do_mecab_iter
 
 
 class TestDomecab(unittest.TestCase):
@@ -20,6 +21,19 @@ class TestDomecab(unittest.TestCase):
         words = [w[:-1] for w in words]
         self.assertEqual(words, ['メロン', 'パン', 'を', '食べる'])
 
+
+class TestDomecabIter(unittest.TestCase):
+    def test_iter(self):
+        ins = ['となりの客はよく柿食う客だ', 'バスガス爆発']
+        ct = 0
+        for line in do_mecab_iter(ins, byline=False):
+            ct += 1 
+        self.assertEqual(ct, 2)
+
+        ct = 0
+        for line in do_mecab_iter(ins, '-Owakati', byline=True):
+            ct += 1 
+        self.assertEqual(ct, 2)
 
 if __name__ == '__main__':
     unittest.main()
