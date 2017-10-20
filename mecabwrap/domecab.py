@@ -13,7 +13,7 @@ def do_mecab(x, *args, outpath=None):
     :param outpath:  None or a valid file path
     :param *args:    options of mecab; see `mecab --help`
     
-    :returns:        if not successful, error message is returned;
+    :return:        if not successful, error message is returned;
                      if successful and outpath is not given, then
                      mecab outcome is returned as bytes;
                      if successful and outpath is givem then
@@ -51,7 +51,7 @@ def do_mecab_iter(x, *args, byline=False):
     :param byline:   if true, generator yields one line at at time;
                      otherwise, it yields a chunk up to 'EOS' at a time
     
-    :returns"        generator of mecab outcomes
+    :return"        generator of mecab outcomes
     """
 
     # write x to a temp file
