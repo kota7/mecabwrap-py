@@ -10,11 +10,11 @@ from mecabwrap.domecab import do_mecab_iter
 
 class TestDomecab(unittest.TestCase):
     def test_wakati(self):
-        out = do_mecab('すもももももももものうち', '-Owakati').decode()
+        out = do_mecab('すもももももももものうち', '-Owakati')
         self.assertEqual(out.strip(), 'すもも も もも も もも の うち')
 
     def test_default(self):
-        out = do_mecab('メロンパンを食べる').decode()
+        out = do_mecab('メロンパンを食べる')
         lbs = re.findall('\n', out) 
         self.assertEqual(len(lbs), 5)
 
@@ -26,7 +26,7 @@ class TestDomecab(unittest.TestCase):
 class TestDomecabVec(unittest.TestCase):
     def test_vec(self):
         ins = ['春はあけぼの', 'やうやう白くなりゆく山際']
-        out = do_mecab_vec(ins, outpath=None).decode()
+        out = do_mecab_vec(ins, outpath=None)
         lbs = re.findall('\n', out)
         self.assertEqual(len(lbs), 10)
 

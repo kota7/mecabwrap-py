@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import codecs
 import subprocess
 from tempfile import mkstemp
 
 
-def do_mecab(x, *args, outpath=None):
+def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
     """
     call mecab
     
@@ -13,12 +14,13 @@ def do_mecab(x, *args, outpath=None):
     :param outpath:  None or a valid file path
     :param *args:    options of mecab; see `mecab --help`
     
-    :return:         if not successful, error message is returned;
+    :return:         string;
+                     if not successful, error message is returned;
                      if successful and outpath is not given, then
-                     mecab outcome is returned as bytes;
+                     mecab outcome is returned;
                      if successful and outpath is givem then
                      the results are written to the file and 
-                     an empty byte is returned
+                     an empty string is returned
     """
 
     assert isinstance(x, str), "x must be str"
@@ -34,13 +36,13 @@ def do_mecab(x, *args, outpath=None):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE)
 
-    out, err = p.communicate((x + '\n').encode())
+    out, err = p.communicate((x + '\n').encode(mecab_enc))
     p.terminate()
     
-    return out
+    return out.decode(mecab_enc)
 
 
-def do_mecab_vec(x, *args, outpath=None):
+def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
     """
     call mecab with multiple inputs 
     
@@ -53,10 +55,10 @@ def do_mecab_vec(x, *args, outpath=None):
     """
 
     # write x to a temp file
-    _, infile = mkstemp()
-    with open(infile, "wt") as f:
+    fd, infile = mkstemp()
+    with open(infile, "wb") as f:
         for txt in x:
-            f.write(txt + '\n')
+            f.write((txt + '\n').encode(mecab_enc))
 
     # call mecab
     command = ['mecab', infile, *args]
@@ -68,13 +70,15 @@ def do_mecab_vec(x, *args, outpath=None):
                          stdout=subprocess.PIPE)
     out, err = p.communicate()
     p.terminate()
+    
+    os.close(fd)
     os.remove(infile)
     
-    return out 
+    return out.decode(mecab_enc) 
 
 
 
-def do_mecab_iter(x, *args, byline=False):
+def do_mecab_iter(x, *args, byline=False, mecab_enc='utf8'):
     """
     call mecab with multiple inputs and get results one by one
 
@@ -87,23 +91,24 @@ def do_mecab_iter(x, *args, byline=False):
     """
 
     # make a temp file for writing output
-    _, ofile = mkstemp()
+    fd, ofile = mkstemp()
 
-    do_mecab_vec(x, *args, outpath=ofile)
+    do_mecab_vec(x, *args, outpath=ofile, mecab_enc=mecab_enc)
 
 
-    with open(ofile, 'rt') as f:
+    with open(ofile, 'rb') as f:
         if byline:
             for line in f:
-                yield line.strip()
+                yield line.decode(mecab_enc).strip()
         else:
-            doc = ''
+            doc = b''
             for line in f:
                 doc += line
-                tmp = line.strip()
+                tmp = line.decode(mecab_enc).strip()
                 if len(tmp) >= 3 and tmp[-3:] == 'EOS':
-                    yield doc.strip()
-                    doc = ''
+                    yield doc.decode(mecab_enc).strip()
+                    doc = b''
+    os.close(fd)
     os.remove(ofile)
 
 

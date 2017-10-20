@@ -43,7 +43,7 @@ class Token:
         return out
 
 
-def tokenize(x):
+def tokenize(x, mecab_enc='utf8'):
     """
     Tokenize a string 
 
@@ -52,7 +52,7 @@ def tokenize(x):
     :return:    generator of tokens
     """
 
-    o = do_mecab(x).decode().split('\n')
+    o = do_mecab(x, mecab_enc=mecab_enc).split('\n')
     for line in o:
         if line.strip()=="EOS":
             break
