@@ -30,20 +30,22 @@ def do_mecab(x, *args, **kwargs):
     
     # make sure that x is a unicode string
     if isinstance(x, bytes):
-        args = { key:kwargs[key] for key in kwargs if key in ['encoding', 'errors'] }
+        args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
         x = x.decode(**args)
         
     
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
-    if sys.version_info.major == 3:
+    if sys.version_info[0] == 3:
         assert isinstance(x, str), "x must be string"
         assert outpath is None or isinstance(outpath, str)
-    elif sys.version_info.major == 2:
+    elif sys.version_info[0] == 2:
         assert isinstance(x, unicode), "x must be unicode string"
         assert outpath is None or isinstance(outpath, str) or isinstance(outpath, unicode) 
-        
+    else:
+        print("do we have python 4 now?")
+            
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
@@ -77,7 +79,8 @@ def do_mecab_vec(x, *args, **kwargs):
     :return:          string of the output of mecab call
     """
     
-    decode_args = { key:kwargs[key] for key in kwargs if key in ['encoding', 'errors'] }
+    decode_args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
+
     
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', 'utf8')
