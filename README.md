@@ -1,6 +1,8 @@
 
 # mecabwrap
 
+[![Build Status](https://travis-ci.org/kota7/mecabwrap-py.svg?branch=master)](https://travis-ci.org/kota7/mecabwrap-py)
+
 **mecabwrap** is yet another wrapper for [MeCab Morphological Analyzer](http://taku910.github.io/mecab/).
 
 It is intended to be used seamlessly on Unix and Windows machine.
@@ -115,3 +117,6 @@ for text in do_mecab_iter(ins, '-F%f[6](%f[1]) | ', byline=True):
 
 - `-o` option (output file) does not work with `do_mecab_iter`.
 - To write the outcome directly to a file, use `do_mecab` or `do_mecab_vec` with `outpath` argument.
+
+
+
