@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import sys
 from .domecab import do_mecab, do_mecab_iter
 
 
@@ -11,19 +12,16 @@ class Token:
 
     def __init__(self, **kwargs):
         # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
-        self.surface     = None
-        self.pos         = None
-        self.pos_detail1 = None
-        self.pos_detail2 = None
-        self.pos_detail3 = None
-        self.infl_type   = None
-        self.infl_form   = None
-        self.base_form   = None
-        self.reading     = None
-        self.phoenetic   = None
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.surface     = kwargs.pop('surface'  , None)
+        self.pos         = kwargs.pop('pos'      , None)
+        self.pos_detail1 = kwargs.pop('detail1'  , None)
+        self.pos_detail2 = kwargs.pop('detail2'  , None)
+        self.pos_detail3 = kwargs.pop('detail3'  , None)
+        self.infl_type   = kwargs.pop('infl_type', None)
+        self.infl_form   = kwargs.pop('infl_form', None)
+        self.base_form   = kwargs.pop('base_form', None)
+        self.reading     = kwargs.pop('reading'  , None)
+        self.phoenetic   = kwargs.pop('phoenetic', None)
 
 
     def __str__(self):
@@ -38,10 +36,44 @@ class Token:
             self.reading,
             self.phoenetic
         ]
-        tmp = tuple('*' if a is None else a for a in tmp)
+        if sys.version_info[0] == 2:
+            tmp = ['*' if a is None else a for a in tmp]
+            tmp = tuple(a.encode('utf8') for a in tmp)
+        else:
+            tmp = tuple('*' if a is None else a for a in tmp)
+        
         out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s' % tmp
         return out
-
+    
+    
+    def __format__(self, formatspec):
+        """
+        encode token info in an arbitrary encoding
+        implemented for python 2 with 
+        encoding other than utf8
+        
+        :param formatspec:  encoding
+        """
+        tmp = [
+            self.surface, 
+            self.pos,
+            self.pos_detail1,
+            self.pos_detail2,
+            self.infl_type,
+            self.infl_form,
+            self.base_form,
+            self.reading,
+            self.phoenetic
+        ]
+        if sys.version_info[0] == 2:
+            tmp = ['*' if a is None else a for a in tmp]
+            tmp = tuple(a.encode(formatspec) for a in tmp)
+        else:
+            tmp = tuple('*' if a is None else a for a in tmp)
+        
+        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+        return out
+        
 
 def tokenize(x, mecab_enc='utf8'):
     """

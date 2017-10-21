@@ -10,32 +10,32 @@ from mecabwrap.domecab import do_mecab_iter
 
 class TestDomecab(unittest.TestCase):
     def test_wakati(self):
-        out = do_mecab('すもももももももものうち', '-Owakati')
-        self.assertEqual(out.strip(), 'すもも も もも も もも の うち')
+        out = do_mecab(u'すもももももももものうち', '-Owakati')
+        self.assertEqual(out.strip(), u'すもも も もも も もも の うち')
 
     def test_default(self):
-        out = do_mecab('メロンパンを食べる')
-        lbs = re.findall('\n', out) 
+        out = do_mecab(u'メロンパンを食べる')
+        lbs = re.findall(r'\n', out) 
         self.assertEqual(len(lbs), 5)
 
-        words = re.findall('\w+\t', out)
+        words = re.findall(r'[^\t\n]+\t', out)
         words = [w[:-1] for w in words]
-        self.assertEqual(words, ['メロン', 'パン', 'を', '食べる'])
+        self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
 
 
 class TestDomecabVec(unittest.TestCase):
     def test_vec(self):
-        ins = ['春はあけぼの', 'やうやう白くなりゆく山際']
+        ins = [u'春はあけぼの', u'やうやう白くなりゆく山際']
         out = do_mecab_vec(ins, outpath=None)
-        lbs = re.findall('\n', out)
+        lbs = re.findall(r'\n', out)
         self.assertEqual(len(lbs), 10)
 
-        words = re.findall('\w+\t', out)
+        words = re.findall(r'[^\t\n]+\t', out)
         words = [w[:-1] for w in words]
         self.assertEqual(
             words,
-            ['春', 'は', 'あけぼの', 'やうやう', 
-             '白く', 'なり', 'ゆく', '山際']
+            [u'春', u'は', u'あけぼの', u'やうやう', 
+             u'白く', u'なり', u'ゆく', u'山際']
         )
 
         lines = out.split('\n')
@@ -46,7 +46,7 @@ class TestDomecabVec(unittest.TestCase):
 
 class TestDomecabIter(unittest.TestCase):
     def test_iter(self):
-        ins = ['となりの客はよく柿食う客だ', 'バスガス爆発']
+        ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
         for line in do_mecab_iter(ins, byline=False):
             ct += 1 

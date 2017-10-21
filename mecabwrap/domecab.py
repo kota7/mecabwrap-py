@@ -1,31 +1,44 @@
 # -*- coding: utf-8 -*-
 
 import os
-import codecs
+import sys
 import subprocess
 from tempfile import mkstemp
 
 
-def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
+def do_mecab(x, *args, **kwargs):
     """
     call mecab
     
-    :param x:        a string
-    :param outpath:  None or a valid file path
-    :param *args:    options of mecab; see `mecab --help`
-    
-    :return:         string;
-                     if not successful, error message is returned;
-                     if successful and outpath is not given, then
-                     mecab outcome is returned;
-                     if successful and outpath is givem then
-                     the results are written to the file and 
-                     an empty string is returned
-    """
+    :param x:         a unicode string
+    :param *args:     options of mecab; see `mecab --help`
+    :param **kwargs:  other options
+                      - outpath (default: None) : if None, outcome is returned;
+                        otherwise, outcome is written to the file
+                      - mecab_enc (default: 'utf8'): encoding of mecab
 
-    assert isinstance(x, str), "x must be str"
-    assert outpath is None or isinstance(outpath, str)
+    :return:          unicode string;
+                      if not successful, error message is returned;
+                      if successful and outpath is not given, then
+                      mecab outcome is returned;
+                      if successful and outpath is givem then
+                      the results are written to the file and 
+                      an empty string is returned
+    """
     
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
+
+    if sys.version_info[0] == 3:
+        assert isinstance(x, str), "x must be string"
+        assert outpath is None or isinstance(outpath, str)
+    elif sys.version_info[0] == 2:
+        assert isinstance(x, unicode), "x must be unicode string"
+        assert outpath is None or isinstance(outpath, str) or isinstance(outpath, unicode) 
+    else:
+        print("do we have python 4 now?")
+
+            
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
@@ -38,22 +51,30 @@ def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
                          stdout=subprocess.PIPE)
 
     out, err = p.communicate((x + '\n').encode(mecab_enc))
-    p.terminate()
+    #p.terminate()
     
     return out.decode(mecab_enc)
 
 
-def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
+def do_mecab_vec(x, *args, **kwargs):
     """
     call mecab with multiple inputs 
     
-    :param x:       iterable
-    :param *args:   options to mecab; see `mecab --help`
-    :param outpath: if None, outcome is returned as a combined binary string;
-                    if str indiccating a valid file path, 
-                    the outcome is written to the file
-    :return:        a binary string of output of mecab call
+    :param x:         iterable
+    :param *args:     options to mecab; see `mecab --help`
+    :param **kwargs:  other options
+                      - outpath (default: None) : if None, outcome is returned;
+                        otherwise, outcome is written to the file
+                      - mecab_enc (default: 'utf8') : encoding of mecab
+ 
+    :return:          result of mecab call in unicode string
     """
+    
+    decode_args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
+
+    
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
     # write x to a temp file
     fd, infile = mkstemp()
@@ -70,7 +91,7 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
                          stdin=subprocess.PIPE, 
                          stdout=subprocess.PIPE)
     out, err = p.communicate()
-    p.terminate()
+    #p.terminate()
     
     os.close(fd)
     os.remove(infile)
@@ -79,17 +100,23 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
 
 
 
-def do_mecab_iter(x, *args, byline=False, mecab_enc='utf8'):
+def do_mecab_iter(x, *args, **kwargs):
     """
     call mecab with multiple inputs and get results one by one
 
-    :param x:        iterable
-    :param *args:    options to mecab; see `mecab --help`
-    :param byline:   if true, generator yields one line at at time;
-                     otherwise, it yields a chunk up to 'EOS' at a time
-    
-    :return:         generator of mecab outcomes
+    :param x:         iterable
+    :param *args:     options to mecab; see `mecab --help`
+    :param **kwargs:  other options.
+                      - byline (default: False) : if true, 
+                        the returned generator yields one line at at time;
+                        otherwise, it yields a chunk up to 'EOS' at a time
+                      - mecab_enc (default: 'utf8') : encoding of mecab
+
+    :return:          generator of mecab outcomes
     """
+
+    byline    = kwargs.pop('byline', False)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
     # make a temp file for writing output
     fd, ofile = mkstemp()

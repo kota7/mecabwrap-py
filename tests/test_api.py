@@ -7,11 +7,11 @@ from mecabwrap.api import tokenize
 
 class TestTokenize(unittest.TestCase):
     def test_tokenize(self):
-        tokens = tokenize('すもももももももものうち')
+        tokens = tokenize(u'すもももももももものうち')
         words = [a.surface for a in tokens]
         self.assertEqual(
             words, 
-            ['すもも', 'も', 'もも', 'も', 'もも', 'の', 'うち']
+            [u'すもも', u'も', u'もも', u'も', u'もも', u'の', u'うち']
         )
 
 
