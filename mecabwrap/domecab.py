@@ -29,9 +29,10 @@ def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
-    command = ["mecab", *args]
+    command = ["mecab"] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
+
     p = subprocess.Popen(command, 
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE)
@@ -61,7 +62,7 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
             f.write((txt + '\n').encode(mecab_enc))
 
     # call mecab
-    command = ['mecab', infile, *args]
+    command = ['mecab', infile] + list(args)
     if outpath is not None:
         command += ['-o', outpath]
 
