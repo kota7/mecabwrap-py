@@ -11,19 +11,16 @@ class Token:
 
     def __init__(self, **kwargs):
         # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
-        self.surface     = None
-        self.pos         = None
-        self.pos_detail1 = None
-        self.pos_detail2 = None
-        self.pos_detail3 = None
-        self.infl_type   = None
-        self.infl_form   = None
-        self.base_form   = None
-        self.reading     = None
-        self.phoenetic   = None
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.surface     = kwargs.pop('surface'  , None)
+        self.pos         = kwargs.pop('pos'      , None)
+        self.pos_detail1 = kwargs.pop('detail1'  , None)
+        self.pos_detail2 = kwargs.pop('detail2'  , None)
+        self.pos_detail3 = kwargs.pop('detail3'  , None)
+        self.infl_type   = kwargs.pop('infl_type', None)
+        self.infl_form   = kwargs.pop('infl_form', None)
+        self.base_form   = kwargs.pop('base_form', None)
+        self.reading     = kwargs.pop('reading'  , None)
+        self.phoenetic   = kwargs.pop('phoenetic', None)
 
 
     def __str__(self):

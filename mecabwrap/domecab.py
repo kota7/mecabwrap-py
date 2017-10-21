@@ -6,22 +6,28 @@ import subprocess
 from tempfile import mkstemp
 
 
-def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
+def do_mecab(x, *args, **kwargs):
     """
     call mecab
     
-    :param x:        a string
-    :param outpath:  None or a valid file path
-    :param *args:    options of mecab; see `mecab --help`
-    
-    :return:         string;
-                     if not successful, error message is returned;
-                     if successful and outpath is not given, then
-                     mecab outcome is returned;
-                     if successful and outpath is givem then
-                     the results are written to the file and 
-                     an empty string is returned
+    :param x:         a string
+    :param *args:     options of mecab; see `mecab --help`
+    :param **kwargs:  other options
+                      - outpath (default: None) : if None, outcome is returned;
+                        otherwise, outcome is written to the file
+                      - mecab_enc (default: 'utf8'): encoding of mecab
+
+    :return:          string;
+                      if not successful, error message is returned;
+                      if successful and outpath is not given, then
+                      mecab outcome is returned;
+                      if successful and outpath is givem then
+                      the results are written to the file and 
+                      an empty string is returned
     """
+
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
     assert isinstance(x, str), "x must be str"
     assert outpath is None or isinstance(outpath, str)
@@ -43,17 +49,22 @@ def do_mecab(x, *args, outpath=None, mecab_enc='utf8'):
     return out.decode(mecab_enc)
 
 
-def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
+def do_mecab_vec(x, *args, **kwargs):
     """
     call mecab with multiple inputs 
     
-    :param x:       iterable
-    :param *args:   options to mecab; see `mecab --help`
-    :param outpath: if None, outcome is returned as a combined binary string;
-                    if str indiccating a valid file path, 
-                    the outcome is written to the file
-    :return:        a binary string of output of mecab call
+    :param x:         iterable
+    :param *args:     options to mecab; see `mecab --help`
+    :param **kwargs:  other options
+                      - outpath (default: None) : if None, outcome is returned;
+                        otherwise, outcome is written to the file
+                      - mecab_enc (default: 'utf8') : encoding of mecab
+
+    :return:          string of the output of mecab call
     """
+
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
     # write x to a temp file
     fd, infile = mkstemp()
@@ -79,17 +90,23 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc='utf8'):
 
 
 
-def do_mecab_iter(x, *args, byline=False, mecab_enc='utf8'):
+def do_mecab_iter(x, *args, **kwargs):
     """
     call mecab with multiple inputs and get results one by one
 
-    :param x:        iterable
-    :param *args:    options to mecab; see `mecab --help`
-    :param byline:   if true, generator yields one line at at time;
-                     otherwise, it yields a chunk up to 'EOS' at a time
-    
-    :return:         generator of mecab outcomes
+    :param x:         iterable
+    :param *args:     options to mecab; see `mecab --help`
+    :param **kwargs:  other options.
+                      - byline (default: False) : if true, 
+                        the returned generator yields one line at at time;
+                        otherwise, it yields a chunk up to 'EOS' at a time
+                      - mecab_enc (default: 'utf8') : encoding of mecab
+
+    :return:          generator of mecab outcomes
     """
+
+    byline    = kwargs.pop('byline', False)
+    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
 
     # make a temp file for writing output
     fd, ofile = mkstemp()
