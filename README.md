@@ -7,6 +7,12 @@
 
 It is intended to be used seamlessly on Unix and Windows machine.
 
+
+## Requirement
+
+- Python 3.5+
+- MeCab 0.996
+
 ## A Simple Tokenizer
 
 The `tokenize` function provides a high level API for splitting a text into tokens.
