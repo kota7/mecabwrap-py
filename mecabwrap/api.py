@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import sys
 from .domecab import do_mecab, do_mecab_iter
 
 
@@ -35,10 +36,44 @@ class Token:
             self.reading,
             self.phoenetic
         ]
-        tmp = tuple('*' if a is None else a for a in tmp)
+        if sys.version_info[0] == 2:
+            tmp = ['*' if a is None else a for a in tmp]
+            tmp = tuple(a.encode('utf8') for a in tmp)
+        else:
+            tmp = tuple('*' if a is None else a for a in tmp)
+        
         out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s' % tmp
         return out
-
+    
+    
+    def __format__(self, formatspec):
+        """
+        encode token info in an arbitrary encoding
+        implemented for python 2 with 
+        encoding other than utf8
+        
+        :param formatspec:  encoding
+        """
+        tmp = [
+            self.surface, 
+            self.pos,
+            self.pos_detail1,
+            self.pos_detail2,
+            self.infl_type,
+            self.infl_form,
+            self.base_form,
+            self.reading,
+            self.phoenetic
+        ]
+        if sys.version_info[0] == 2:
+            tmp = ['*' if a is None else a for a in tmp]
+            tmp = tuple(a.encode(formatspec) for a in tmp)
+        else:
+            tmp = tuple('*' if a is None else a for a in tmp)
+        
+        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+        return out
+        
 
 def tokenize(x, mecab_enc='utf8'):
     """

@@ -10,16 +10,14 @@ def do_mecab(x, *args, **kwargs):
     """
     call mecab
     
-    :param x:         a string
+    :param x:         a unicode string
     :param *args:     options of mecab; see `mecab --help`
     :param **kwargs:  other options
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
                       - mecab_enc (default: 'utf8'): encoding of mecab
-                      - encoding, error: if `x` is bytes type, then passed to
-                        `bytes.decode` for casting to unicode;
 
-    :return:          string;
+    :return:          unicode string;
                       if not successful, error message is returned;
                       if successful and outpath is not given, then
                       mecab outcome is returned;
@@ -27,12 +25,6 @@ def do_mecab(x, *args, **kwargs):
                       the results are written to the file and 
                       an empty string is returned
     """
-    
-    # make sure that x is a unicode string
-    if isinstance(x, bytes):
-        args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
-        x = x.decode(**args)
-        
     
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', 'utf8')
@@ -45,6 +37,7 @@ def do_mecab(x, *args, **kwargs):
         assert outpath is None or isinstance(outpath, str) or isinstance(outpath, unicode) 
     else:
         print("do we have python 4 now?")
+
             
     # conduct mecab if outfile is not None, 
     # then write it to the file;
@@ -73,10 +66,8 @@ def do_mecab_vec(x, *args, **kwargs):
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
                       - mecab_enc (default: 'utf8') : encoding of mecab
-                      - encoding, error: if `x` is bytes type, then passed to
-                        `bytes.decode` for casting to unicode;
-
-    :return:          string of the output of mecab call
+ 
+    :return:          result of mecab call in unicode string
     """
     
     decode_args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
@@ -89,11 +80,6 @@ def do_mecab_vec(x, *args, **kwargs):
     fd, infile = mkstemp()
     with open(infile, "wb") as f:
         for txt in x:
-            # make sure that txt is a unicode string;
-            # this may look redundant as txt is encoded to bytes anyways,
-            # but is necessary since input encoding and mecab encoding may differ
-            if isinstance(txt, bytes):                
-                txt = txt.decode(**decode_args)
             f.write((txt + '\n').encode(mecab_enc))
 
     # call mecab
@@ -125,8 +111,6 @@ def do_mecab_iter(x, *args, **kwargs):
                         the returned generator yields one line at at time;
                         otherwise, it yields a chunk up to 'EOS' at a time
                       - mecab_enc (default: 'utf8') : encoding of mecab
-                      - encoding, error: if `x` is bytes type, then passed to
-                        `bytes.decode` for casting to unicode;
 
     :return:          generator of mecab outcomes
     """
