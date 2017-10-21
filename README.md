@@ -5,12 +5,12 @@
 
 **mecabwrap** is yet another wrapper for [MeCab Morphological Analyzer](http://taku910.github.io/mecab/).
 
-It is intended to be used seamlessly on Unix and Windows machine.
+It is designed to work seamlessly on Unix and Windows machine.
 
 
 ## Requirement
 
-- Python 3.5+
+- Python 2.6+ or 3.4+
 - MeCab 0.996
 
 ## A Simple Tokenizer
