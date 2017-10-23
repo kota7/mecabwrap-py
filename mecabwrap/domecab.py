@@ -4,6 +4,8 @@ import os
 import sys
 import subprocess
 from tempfile import mkstemp
+from .globals import get_mecab
+from .utils import mecab_exists
 
 
 def do_mecab(x, *args, **kwargs):
@@ -34,15 +36,20 @@ def do_mecab(x, *args, **kwargs):
         assert outpath is None or isinstance(outpath, str)
     elif sys.version_info[0] == 2:
         assert isinstance(x, unicode), "x must be unicode string"
-        assert outpath is None or isinstance(outpath, str) or isinstance(outpath, unicode) 
+        assert outpath is None or \
+               isinstance(outpath, str) or \
+               isinstance(outpath, unicode) 
     else:
         print("do we have python 4 now?")
-
             
+    # make sure that mecab is exists
+    assert mecab_exists(), "`%s` not found" % get_mecab()
+
+
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
-    command = ["mecab"] + list(args)
+    command = [get_mecab()] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
 
@@ -70,7 +77,11 @@ def do_mecab_vec(x, *args, **kwargs):
     :return:          result of mecab call in unicode string
     """
     
-    decode_args = dict((key, kwargs[key]) for key in kwargs if key in ['encoding', 'errors'])
+    # make sure that mecab is exists
+    assert mecab_exists(), "`%s` not found" % get_mecab()
+
+    decode_args = dict((key, kwargs[key]) for key in kwargs \
+                       if key in ['encoding', 'errors'])
 
     
     outpath   = kwargs.pop('outpath', None)
@@ -83,7 +94,7 @@ def do_mecab_vec(x, *args, **kwargs):
             f.write((txt + '\n').encode(mecab_enc))
 
     # call mecab
-    command = ['mecab', infile] + list(args)
+    command = [get_mecab(), infile] + list(args)
     if outpath is not None:
         command += ['-o', outpath]
 
