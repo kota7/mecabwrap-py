@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mecabwrap',
-    version='0.1.1',
+    version='0.1.2',
     description='A wrapper for MeCab morphological analyzer',
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
