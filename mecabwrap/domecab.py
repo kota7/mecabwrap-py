@@ -42,7 +42,7 @@ def do_mecab(x, *args, **kwargs):
     else:
         print("do we have python 4 now?")
             
-    # make sure that mecab is exists
+    # make sure that mecab exists
     assert mecab_exists(), "`%s` not found" % get_mecab()
 
 
@@ -77,7 +77,7 @@ def do_mecab_vec(x, *args, **kwargs):
     :return:          result of mecab call in unicode string
     """
     
-    # make sure that mecab is exists
+    # make sure that mecab exists
     assert mecab_exists(), "`%s` not found" % get_mecab()
 
     decode_args = dict((key, kwargs[key]) for key in kwargs \
