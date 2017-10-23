@@ -4,6 +4,7 @@ import os
 import sys
 import subprocess
 from tempfile import mkstemp
+from .config import get_mecab
 
 
 def do_mecab(x, *args, **kwargs):
@@ -42,7 +43,7 @@ def do_mecab(x, *args, **kwargs):
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
-    command = ["mecab"] + list(args)
+    command = [get_mecab()] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
 
@@ -83,7 +84,7 @@ def do_mecab_vec(x, *args, **kwargs):
             f.write((txt + '\n').encode(mecab_enc))
 
     # call mecab
-    command = ['mecab', infile] + list(args)
+    command = [get_mecab(), infile] + list(args)
     if outpath is not None:
         command += ['-o', outpath]
 
