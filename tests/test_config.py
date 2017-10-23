@@ -4,8 +4,8 @@
 
 import unittest
 from mecabwrap import tokenize
-from mecabwrap.config import set_mecab
-from mecabwrap.config import get_mecab
+from mecabwrap.globals import set_mecab
+from mecabwrap.globals import get_mecab
 
 
 class TestSetGet(unittest.TestCase):
@@ -21,6 +21,6 @@ class TestSetGet(unittest.TestCase):
         set_mecab("mecab")
 
 
-
 if __name__ == '__main__':
     unittest.main()
+
