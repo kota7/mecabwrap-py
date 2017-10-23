@@ -11,7 +11,6 @@ class Token:
     """
 
     def __init__(self, **kwargs):
-        # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
         self.surface     = kwargs.pop('surface'  , None)
         self.pos         = kwargs.pop('pos'      , None)
         self.pos_detail1 = kwargs.pop('detail1'  , None)
@@ -88,7 +87,8 @@ def tokenize(x, mecab_enc='utf8'):
     for line in o:
         if line.strip()=="EOS":
             break
-
+            
+        # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
         surface, info = line.split("\t")
         info = info.split(",")
 
