@@ -9,12 +9,13 @@ from .globals import get_mecab
 def mecab_exists():
     command = [get_mecab(), "-v"] 
     try:
-        p = subprocess.run(command, stdout=subprocess.PIPE)
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
     except FileNotFoundError:
         return False
 
-    mess = p.stdout.decode().strip()
-    reg  = re.match(r'mecab', mess)
+    out, err = p.communicate()
+    out = out.decode().strip()
+    reg  = re.match(r'mecab', out)
     return (reg is not None)
 
 
