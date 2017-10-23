@@ -8,7 +8,7 @@ setup(
     description='A wrapper for MeCab morphological analyzer',
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
-    url='https://github.com/kota7/mecabwrap',
+    url='https://github.com/kota7/mecabwrap-py',
     
     packages=['mecabwrap'],
     install_requires=[],
