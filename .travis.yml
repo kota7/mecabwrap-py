@@ -7,10 +7,16 @@ python:
   - "3.5"
   - "3.6"
 
+os:
+  - linux
+  - osx
+
 # command to install dependencies
 install:
-  - sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ];   then brew install mecab mecab-ipadic; fi  
   - pip install .
+  
 #  - pip install -r requirements.txt
 # command to run tests
 script:
