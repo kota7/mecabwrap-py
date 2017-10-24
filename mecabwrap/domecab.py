@@ -63,8 +63,13 @@ def do_mecab(x, *args, **kwargs):
     p = subprocess.Popen(command, 
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE)
-
-    out, err = p.communicate((x + u'\n').encode(mecab_enc))
+    
+    x = x.strip()
+    if len(x) > 0:
+        out, err = p.communicate((x + u'\n').encode(mecab_enc))
+    else:
+        out, err = p.communicate()
+    
     #p.terminate()
     
     return out.decode(mecab_enc)
