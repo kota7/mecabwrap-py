@@ -31,7 +31,7 @@ Installation
 
 .. code:: bash
 
-    $ sudo apt-get install mecab mecab-ipadic
+    $ brew install mecab mecab-ipadic
 
 **Windows**
 
