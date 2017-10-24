@@ -9,7 +9,8 @@ setup(
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
     url='https://github.com/kota7/mecabwrap-py',
-    
+    download_url='https://github.com/kota7/mecabwrap-py/archive/0.1.3.tar.gz',
+
     packages=['mecabwrap'],
     install_requires=[],
     package_data={},
@@ -37,6 +38,5 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6'        
     ],
-    
     test_suite='tests'
 )
