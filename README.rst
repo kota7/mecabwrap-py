@@ -60,15 +60,17 @@ or, from GitHub
 Quick Check
 -----------
 
-Verify that the MeCab has been sucessfully installed by:
+To verify that the MeCab has been sucessfully,
 
 .. code:: bash
 
     $ mecab -v
     # should result in `mecab of 0.996` or similar.
 
-Otherwise, you do not have MeCab installed successfully or MeCab is not
+If this causes error or gives an unexpected outcome, then it is either MeCab has not been installed or MeCab is not
 on the search path.
+
+The code below verifies that MeCab works properly.
 
 .. code:: bash
 
@@ -81,7 +83,8 @@ on the search path.
     # の 助詞,連体化,*,*,*,*,の,ノ,ノ
     # うち    名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
 
-To verify that the package is success fully installed,
+
+Finally, to verify that the package is success fully installed,
 
 .. code:: bash
 
