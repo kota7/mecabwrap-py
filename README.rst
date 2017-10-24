@@ -46,6 +46,7 @@ See also: `official website <http://taku910.github.io/mecab/#install>`__
 Install from PyPI
 
 .. code:: bash
+
     $ pip install mecabwrap
     
 or, from GitHub
