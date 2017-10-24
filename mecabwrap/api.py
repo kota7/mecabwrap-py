@@ -74,18 +74,28 @@ class Token:
         return out
         
 
-def tokenize(x, mecab_enc=None):
+def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     """
     Tokenize a string 
 
     :param x:         string
     :param mecab_enc: encoding mecab dictionary;
                       if None, automatically detected
+    :param sysdic:    system dictionary directory
+    :param userdic:   user dictionary file
 
     :return:    generator of tokens
     """
-
-    o = do_mecab(x, mecab_enc=mecab_enc).split('\n')
+    
+    # collect mecab options
+    opts = []
+    if sysdic is not None:
+        opts += ['-d', sysdic]
+    if userdic is not None:
+        opts += ['-u', userdic]
+        
+    o = do_mecab(x, *opts, mecab_enc=mecab_enc)
+    o = o.split('\n')
     for line in o:
         if line.strip()=="EOS":
             break
