@@ -74,11 +74,13 @@ class Token:
         return out
         
 
-def tokenize(x, mecab_enc='utf8'):
+def tokenize(x, mecab_enc=None):
     """
     Tokenize a string 
 
-    :param x:   string
+    :param x:         string
+    :param mecab_enc: encoding mecab dictionary;
+                      if None, automatically detected
 
     :return:    generator of tokens
     """
