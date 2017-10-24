@@ -2,7 +2,7 @@
 # mecabwrap
 
 
-**mecabwrap** is yet another wrapper for [MeCab Morphological Analyzer](http://taku910.github.io/mecab/).
+**mecabwrap** is yet another Python interface to [MeCab Morphological Analyzer](http://taku910.github.io/mecab/).
 
 It is designed to work seamlessly on Unix and Windows machine.
 
@@ -99,7 +99,7 @@ $ python
 
 ### A Simple Tokenizer
 
-The `tokenize` function provides a high level API for splitting a text into tokens.
+The `tokenize` function is a high level API for splitting a text into tokens.
 It returns a generator of tokens.
 
 
@@ -110,18 +110,60 @@ for token in tokenize('すもももももももものうち'):
     print(token)
 ```
 
-    すもも	名詞,一般,*,*,*,すもも,スモモ,スモモ
-    も	助詞,係助詞,*,*,*,も,モ,モ
-    もも	名詞,一般,*,*,*,もも,モモ,モモ
-    も	助詞,係助詞,*,*,*,も,モ,モ
-    もも	名詞,一般,*,*,*,もも,モモ,モモ
-    の	助詞,連体化,*,*,*,の,ノ,ノ
-    うち	名詞,非自立,副詞可能,*,*,うち,ウチ,ウチ
+    すもも	名詞,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,*,*,*,*,も,モ,モ
+    もも	名詞,*,*,*,*,もも,モモ,モモ
+    も	助詞,*,*,*,*,も,モ,モ
+    もも	名詞,*,*,*,*,もも,モモ,モモ
+    の	助詞,*,*,*,*,の,ノ,ノ
+    うち	名詞,*,*,*,*,うち,ウチ,ウチ
 
 
-### Multiple Inputs
+### Using MeCab Options
 
-With more than on text inputs, `do_mecab_iter` function returns a generator of MeCab results.
+To configure the MeCab calls, one may use `do_` functions that support arbitrary number of MeCab options.  
+Currently, the following three `do_` functions are provided.
+- `do_mecab`: works with a single input text.
+- `do_mecab_vec`: works with a multiple input texts.
+- `do_mecab_iter`: works with a multiple input texts and returns a generator.
+
+For example, following code invokes the *wakati* option, so the outcome be words separated by spaces with no meta information. 
+See [the official site](http://taku910.github.io/mecab/format.html) for more details.
+
+
+```python
+from mecabwrap import do_mecab
+out = do_mecab('人生楽ありゃ苦もあるさ', '-Owakati')
+print(out)
+```
+
+    人生 楽 ありゃ 苦 も ある さ 
+    
+
+
+The exapmle below uses `do_mecab_vec` to parse multiple texts.
+Note that `-F` option configures the outcome formatting.
+
+
+
+```python
+from mecabwrap import do_mecab_vec
+ins = ['春はあけぼの', 'やうやう白くなりゆく山際', '少し明かりて', '紫だちたる雲の細くたなびきたる']
+
+out = do_mecab_vec(ins, '-F%f[6](%f[1]) | ')
+print(out)
+```
+
+    春(一般) | は(係助詞) | あけぼの(固有名詞) | EOS
+    やうやう(一般) | 白い(自立) | なる(自立) | ゆく(非自立) | 山際(一般) | EOS
+    少し(助詞類接続) | 明かり(一般) | て(格助詞) | EOS
+    紫(一般) | だ() | ちる(自立) | たり() | 雲(一般) | の(連体化) | 細い(自立) | たなびく(自立) | たり() | EOS
+    
+
+
+### Returning Iterators
+
+When the number of input text is large, then holding the outcomes in the memory may not be a good idea.  `do_mecab_iter` function, which works for multiple texts, returns a generator of MeCab results.
 When `byline=True`, each chunk is a line, which corresponds to a token in the default setting.
 When `byline=False`, each chunk is a document, where a document is assumed to terminate with `'EOS'.`
 
@@ -167,46 +209,119 @@ for text in do_mecab_iter(ins, byline=False):
     EOS
 
 
-### Using MeCab Options
+### Writing the outcome to file
 
-The `do_` functions supports options of MeCab.  For example, following code invokes the *wakati* option, so the outcome be words separated by spaces with no meta information. 
-Note that `byline` is set to `False`, since with the *wakati* option each line represents a text and `"EOS"` marker is not used.
+To write the MeCab outcomes directly to a file, one may either use `-o` option or `outpath` argument.  Note that this does not work with `do_mecab_iter`, since it is designed to write the outcomes to a temporary file.
 
-
-```python
-ins = ['春はあけぼの', 'やうやう白くなりゆく山際', '少し明かりて', '紫だちたる雲の細くたなびきたる']
-
-for text in do_mecab_iter(ins, '-Owakati', byline=True):
-    print(text)
-```
-
-    春 は あけぼの
-    やうやう 白く なり ゆく 山際
-    少し 明かり て
-    紫 だ ち たる 雲 の 細く たなびき たる
-
-
-More complex output formatting is allowed with `-F` option.  
-See [the official site](http://taku910.github.io/mecab/format.html) for more details.
 
 
 ```python
-ins = ['春はあけぼの', 'やうやう白くなりゆく山際', '少し明かりて', '紫だちたる雲の細くたなびきたる']
+do_mecab('すもももももももものうち', '-osumomo1.txt')
+# or,
+do_mecab('すもももももももものうち', outpath='sumomo2.txt')
 
-for text in do_mecab_iter(ins, '-F%f[6](%f[1]) | ', byline=True):
-    print(text)
+with open('sumomo1.txt') as f: 
+    print(f.read())
+with open('sumomo2.txt') as f: 
+    print(f.read())
+
+import os
+# clean up
+os.remove('sumomo1.txt')
+os.remove('sumomo2.txt')
+
+# this does not create a file
+do_mecab_iter(['すもももももももものうち'], '-osumomo3.txt')
+os.path.exists('sumomo3.txt')
 ```
 
-    春(一般) | は(係助詞) | あけぼの(固有名詞) | EOS
-    やうやう(一般) | 白い(自立) | なる(自立) | ゆく(非自立) | 山際(一般) | EOS
-    少し(助詞類接続) | 明かり(一般) | て(格助詞) | EOS
-    紫(一般) | だ() | ちる(自立) | たり() | 雲(一般) | の(連体化) | 細い(自立) | たなびく(自立) | たり() | EOS
+    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    の	助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+    EOS
+    
+    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    の	助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+    EOS
+    
 
 
-### Note
-
-- `-o` option (output file) does not work with `do_mecab_iter`, since it is designed to write the outcomes to a temporary file.
-- To write the outcome directly to a file, use `do_mecab` or `do_mecab_vec` with `outpath` argument.
 
 
+
+    False
+
+
+
+### Note on Python 2
+
+All text inputs are assumed to be unicode.  
+In Python2, inputs must be `u''` string, not `''`.
+In python3, `str` type is unicode, so `u''` and `''` are equivalent.
+
+
+```python
+o1 = do_mecab('すもももももももものうち')   # this works only for python 3
+o2 = do_mecab(u'すもももももももものうち')  # this works both for python 2 and 3
+print(o1)
+print(o2)
+```
+
+    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    の	助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+    EOS
+    
+    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    の	助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+    EOS
+    
+
+
+### Note on dictionary encodings
+
+The functions takes `mecab_enc` option, which indicates the encoding of the MeCab dictionary being used.  Usually this can be left as the default value `None`, so that the encoding is automatically detected.  Alternatively, one may specify the encoding explicitly.
+
+
+```python
+o1 = do_mecab('日本列島改造論', mecab_enc=None)      # default
+print(o1)
+
+o2 = do_mecab('日本列島改造論', mecab_enc='utf-8')   # explicitly specified
+print(o2)
+
+#o3 = do_mecab('日本列島改造論', mecab_enc='cp932')   # wrong encoding, fails
+
+```
+
+    日本	名詞,固有名詞,地域,国,*,*,日本,ニッポン,ニッポン
+    列島	名詞,一般,*,*,*,*,列島,レットウ,レットー
+    改造	名詞,サ変接続,*,*,*,*,改造,カイゾウ,カイゾー
+    論	名詞,接尾,一般,*,*,*,論,ロン,ロン
+    EOS
+    
+    日本	名詞,固有名詞,地域,国,*,*,日本,ニッポン,ニッポン
+    列島	名詞,一般,*,*,*,*,列島,レットウ,レットー
+    改造	名詞,サ変接続,*,*,*,*,改造,カイゾウ,カイゾー
+    論	名詞,接尾,一般,*,*,*,論,ロン,ロン
+    EOS
+    
 
