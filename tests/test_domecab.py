@@ -62,8 +62,9 @@ class TestDomecabIter(unittest.TestCase):
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
         out = do_mecab(u"すもももももももものうち", '-Bbegin\n', '-Eend\n')
-        out = out.strip().split('\n')
-        self.assertEqual(out[0] , 'begin')
+        out = out.strip()
+        out = re.split('(\r\n)|(\n)|(\r)', out)
+        self.assertEqual(out[0], 'begin')
         self.assertEqual(out[-1], 'end')
 
  
