@@ -12,7 +12,7 @@ It is designed to work seamlessly on Unix and Windows machine.
 Requirement
 -----------
 
--  Python 2.6+ or 3.4+
+-  Python 2.6+ or 3.3+
 -  MeCab 0.996
 
 Installation
