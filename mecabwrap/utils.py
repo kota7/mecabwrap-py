@@ -26,9 +26,9 @@ def mecab_exists():
     return (reg is not None)
 
 
-def get_mecab_enc(*args):
+def detect_mecab_enc(*args):
     """
-    detect the mecab's charset
+    detect the mecab's dictionary charset (encoding)
     
     :param *args:  MeCab options; only `-d` option (systen dicdir) is used
     

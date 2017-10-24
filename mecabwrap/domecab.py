@@ -6,6 +6,7 @@ import subprocess
 from tempfile import mkstemp
 from .globals import get_mecab
 from .utils import mecab_exists
+from .utils import detect_mecab_enc
 
 
 def do_mecab(x, *args, **kwargs):
@@ -17,7 +18,8 @@ def do_mecab(x, *args, **kwargs):
     :param **kwargs:  other options
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
-                      - mecab_enc (default: 'utf8'): encoding of mecab
+                      - mecab_enc (default: None): encoding of mecab; if None,
+                        automatically detect the encoding
 
     :return:          unicode string;
                       if not successful, error message is returned;
@@ -29,7 +31,12 @@ def do_mecab(x, *args, **kwargs):
     """
     
     outpath   = kwargs.pop('outpath', None)
-    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
+    mecab_enc = kwargs.pop('mecab_enc', None)
+    
+    # detect enc
+    if mecab_enc is None:
+        mecab_enc = detect_mecab_enc(*args)
+
 
     if sys.version_info[0] == 3:
         assert isinstance(x, str), "x must be string"
@@ -57,7 +64,7 @@ def do_mecab(x, *args, **kwargs):
                          stdin=subprocess.PIPE,
                          stdout=subprocess.PIPE)
 
-    out, err = p.communicate((x + '\n').encode(mecab_enc))
+    out, err = p.communicate((x + u'\n').encode(mecab_enc))
     #p.terminate()
     
     return out.decode(mecab_enc)
@@ -67,48 +74,39 @@ def do_mecab_vec(x, *args, **kwargs):
     """
     call mecab with multiple inputs 
     
-    :param x:         iterable
+    :param x:         iterable of unicode strings
     :param *args:     options to mecab; see `mecab --help`
     :param **kwargs:  other options
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
-                      - mecab_enc (default: 'utf8') : encoding of mecab
+                      - mecab_enc (default: None) : encoding of mecab
  
     :return:          result of mecab call in unicode string
     """
     
     # make sure that mecab exists
     assert mecab_exists(), "`%s` not found" % get_mecab()
-
-    decode_args = dict((key, kwargs[key]) for key in kwargs \
-                       if key in ['encoding', 'errors'])
-
     
     outpath   = kwargs.pop('outpath', None)
-    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
+    mecab_enc = kwargs.pop('mecab_enc', None)
+
+    # detect dictionary encoding if not given
+    if mecab_enc is None:
+        mecab_enc = detect_mecab_enc(*args)
 
     # write x to a temp file
     fd, infile = mkstemp()
     with open(infile, "wb") as f:
         for txt in x:
             f.write((txt + '\n').encode(mecab_enc))
-
-    # call mecab
-    command = [get_mecab(), infile] + list(args)
-    if outpath is not None:
-        command += ['-o', outpath]
-
-    p = subprocess.Popen(command, 
-                         stdin=subprocess.PIPE, 
-                         stdout=subprocess.PIPE)
-    out, err = p.communicate()
-    #p.terminate()
     
+    out = do_mecab(u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
+    
+    # make sure the temp file is removed    
     os.close(fd)
     os.remove(infile)
     
-    return out.decode(mecab_enc) 
-
+    return out
 
 
 def do_mecab_iter(x, *args, **kwargs):
@@ -121,13 +119,17 @@ def do_mecab_iter(x, *args, **kwargs):
                       - byline (default: False) : if true, 
                         the returned generator yields one line at at time;
                         otherwise, it yields a chunk up to 'EOS' at a time
-                      - mecab_enc (default: 'utf8') : encoding of mecab
+                      - mecab_enc (default: None) : encoding of mecab
 
     :return:          generator of mecab outcomes
     """
 
     byline    = kwargs.pop('byline', False)
-    mecab_enc = kwargs.pop('mecab_enc', 'utf8')
+    mecab_enc = kwargs.pop('mecab_enc', None)
+
+    # detect dictionary encoding if not given
+    if mecab_enc is None:
+        mecab_enc = detect_mecab_enc(*args)
 
     # make a temp file for writing output
     fd, ofile = mkstemp()
