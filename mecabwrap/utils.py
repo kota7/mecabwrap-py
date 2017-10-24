@@ -2,7 +2,6 @@
 
 
 import subprocess
-import shlex
 import re
 from .globals import get_mecab
 
@@ -37,22 +36,24 @@ def detect_mecab_enc(*args):
     
     # get -d option if any
     # note that mecab overwrites options given later
-    args = ' '.join(args)
-    args = shlex.split(args)
     dopt = None
     for i in range(len(args)):
         a = args[i]
         if a == '-d' or a == '--dicdir':
             assert i + 1 < len(args)
             dopt = args[i+1]
-        elif a[0:2] == '-d':  # -d option with no space
+        elif a[0:2] == '-d':         # -d option with no space
             dopt = a[2:]
+        elif a[0:9] == '--dicdir=':  # --dicdir option with no space
+            dopt = a[9:]
+    if dopt is not None:
+        dopt = dopt.strip()
     
     assert mecab_exists(), "`%s` not found" % get_mecab()
     command = [get_mecab(), '-D']
     if dopt is not None:
         command += ['-d', dopt]
-    
+        
     p = subprocess.Popen(command, stdout=subprocess.PIPE)
     out, err = p.communicate()
     out = out.decode()

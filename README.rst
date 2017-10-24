@@ -85,13 +85,14 @@ To verify that the package is success fully installed,
     >>> for token in tokenize(u"すもももももももものうち"): 
     ...     print(token)
     ... 
-    すもも 名詞,*,*,*,*,すもも,スモモ,スモモ
-    も   助詞,*,*,*,*,も,モ,モ
-    もも  名詞,*,*,*,*,もも,モモ,モモ
-    も   助詞,*,*,*,*,も,モ,モ
-    もも  名詞,*,*,*,*,もも,モモ,モモ
-    の   助詞,*,*,*,*,の,ノ,ノ
-    うち  名詞,*,*,*,*,うち,ウチ,ウチ
+    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    も	助詞,係助詞,*,*,*,*,も,モ,モ
+    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+    の	助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+
 
 .. |Build Status| image:: https://travis-ci.org/kota7/mecabwrap-py.svg?branch=master
    :target: https://travis-ci.org/kota7/mecabwrap-py
