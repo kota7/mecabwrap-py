@@ -4,7 +4,7 @@ mecabwrap
 
 |Build Status|
 
-**mecabwrap** is yet another wrapper for `MeCab Morphological
+**mecabwrap** is yet another Python interface to `MeCab Morphological
 Analyzer <http://taku910.github.io/mecab/>`__.
 
 It is designed to work seamlessly on Unix and Windows machine.
@@ -31,7 +31,7 @@ Installation
 
 .. code:: bash
 
-    $ sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8
+    $ sudo apt-get install mecab mecab-ipadic
 
 **Windows**
 
