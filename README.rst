@@ -43,6 +43,11 @@ See also: `official website <http://taku910.github.io/mecab/#install>`__
 2. Install this Package
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+Install from PyPI
+.. code:: bash
+    $ pip install mecabwrap
+    
+or, from GitHub
 .. code:: bash
 
     $ git clone --depth 1 https://github.com/kota7/mecabwrap-py.git
