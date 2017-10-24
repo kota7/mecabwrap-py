@@ -28,7 +28,7 @@ $ sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8
 **Mac OSX**
 
 ```bash
-$ sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8
+$ sudo apt-get install mecab mecab-ipadic
 ```
 
 **Windows**
@@ -55,7 +55,7 @@ Verify that the MeCab has been sucessfully installed by:
 
 ```bash
 $ mecab -v
-# should result in `mecab of 0.996` or similar.
+# should result in `mecab of 0.996` or alike.
 ```
 
 Otherwise, you do not have MeCab installed successfully or MeCab is not on the search path.
