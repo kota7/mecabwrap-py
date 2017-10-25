@@ -3,7 +3,7 @@
 
 import subprocess
 import re
-from .globals import get_mecab
+from .config import get_mecab
 
 
 def mecab_exists():
@@ -16,7 +16,7 @@ def mecab_exists():
     command = [get_mecab(), "-v"] 
     try:
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
-    except FileNotFoundError:
+    except OSError:
         return False
 
     out, err = p.communicate()
@@ -64,4 +64,18 @@ def detect_mecab_enc(*args):
     
     
     
-    
+def _no_mecab_message():
+    out = ['* `%s` is not recognized as a valid MeCab command' % get_mecab(),
+           '',
+           '* to install MeCab:',
+           ' - Ubuntu',
+           '  $ sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8',
+           ' - OSX', 
+           '  $ brew install mecab mecab-ipadic',
+           ' - Windows',
+           '  Run the installer at https://drive.google.com/uc?export=download&id=0B4y35FiV1wh7WElGUGt6ejlpVXc',
+           '', 
+           '* to configure the location of `mecab` program:',
+           ' >>> from mecabwrap.config import set_mecab',
+           ' >>> set_mecab("<path-to-mecab-binary>")']
+    return '\n'.join(out)

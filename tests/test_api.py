@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import sys
 from mecabwrap.api import tokenize
 
 
@@ -12,7 +13,39 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(
             words, 
             [u'すもも', u'も', u'もも', u'も', u'もも', u'の', u'うち']
-        )
+         )
+    
+    def test_unicode_type(self):
+        """
+        unicode(token) should give unicode string
+        """
+        tokens = tokenize(u'すもももももももものうち')
+        for token in tokens:
+            s = token.__unicode__()
+            if sys.version_info[0] == 2:
+                self.assertTrue(isinstance(s, unicode))
+            else:
+                self.assertTrue(isinstance(s, str))
+
+    def test_print_str(self):
+        """
+        print(token) should give str in both in python2 and 3
+        """
+        tokens = tokenize(u'すもももももももものうち')
+        for token in tokens:
+            s = token.__str__()
+            self.assertTrue(isinstance(s, str))
+
+    def test_format_str(self):
+        """
+        format(token) should give str in both in python2 and 3
+        """
+        tokens = tokenize(u'すもももももももものうち')
+        for token in tokens:
+            s = token.__format__('utf-8')
+            self.assertTrue(isinstance(s, str))
+
+         
 
 
 

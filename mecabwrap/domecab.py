@@ -4,9 +4,14 @@ import os
 import sys
 import subprocess
 from tempfile import mkstemp
-from .globals import get_mecab
-from .utils import mecab_exists
-from .utils import detect_mecab_enc
+from .config import get_mecab
+from .utils import mecab_exists, detect_mecab_enc, _no_mecab_message
+
+
+# check the mecab command when imported
+if not mecab_exists():
+    print(_no_mecab_message())
+
 
 
 def do_mecab(x, *args, **kwargs):
@@ -30,6 +35,12 @@ def do_mecab(x, *args, **kwargs):
                       an empty string is returned
     """
     
+    # return if mecab does not exist
+    if not mecab_exists():
+        print(_no_mecab_message())
+        return u''
+        
+        
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
     
@@ -49,9 +60,6 @@ def do_mecab(x, *args, **kwargs):
     else:
         print("do we have python 4 now?")
             
-    # make sure that mecab exists
-    assert mecab_exists(), "`%s` not found" % get_mecab()
-
 
     # conduct mecab if outfile is not None, 
     # then write it to the file;
@@ -89,9 +97,11 @@ def do_mecab_vec(x, *args, **kwargs):
     :return:          result of mecab call in unicode string
     """
     
-    # make sure that mecab exists
-    assert mecab_exists(), "`%s` not found" % get_mecab()
-    
+    # return if mecab does not exist
+    if not mecab_exists():
+        print(_no_mecab_message())
+        return u''
+
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
 
@@ -128,6 +138,11 @@ def do_mecab_iter(x, *args, **kwargs):
 
     :return:          generator of mecab outcomes
     """
+    
+    # return if mecab does not exist
+    if not mecab_exists():
+        print(_no_mecab_message())
+        return
 
     byline    = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)

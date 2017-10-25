@@ -11,6 +11,7 @@ class Token:
     """
 
     def __init__(self, **kwargs):
+        # note: variables are stored as unicode
         self.surface     = kwargs.pop('surface'    , None)
         self.pos         = kwargs.pop('pos'        , None)
         self.pos_detail1 = kwargs.pop('pos_detail1', None)
@@ -23,7 +24,7 @@ class Token:
         self.phoenetic   = kwargs.pop('phoenetic'  , None)
 
 
-    def __str__(self):
+    def __unicode__(self):
         tmp = [
             self.surface, 
             self.pos,
@@ -36,15 +37,21 @@ class Token:
             self.reading,
             self.phoenetic
         ]
-        if sys.version_info[0] == 2:
-            tmp = ['*' if a is None else a for a in tmp]
-            tmp = tuple(a.encode('utf8') for a in tmp)
-        else:
-            tmp = tuple('*' if a is None else a for a in tmp)
+        tmp = tuple(u'*' if a is None else a for a in tmp)
         
-        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+        out = u'%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
         return out
     
+    def __str__(self):
+        """
+        For python 3, returns unicode string
+        For python 2, returns utf-8 encoded string
+        To change the encoding, use `format`
+        """
+        out = self.__unicode__()
+        if sys.version_info[0] == 2:
+            out = out.encode('utf-8')
+        return out
     
     def __format__(self, formatspec):
         """
@@ -54,25 +61,10 @@ class Token:
         
         :param formatspec:  encoding
         """
-        tmp = [
-            self.surface, 
-            self.pos,
-            self.pos_detail1,
-            self.pos_detail2,
-            self.pos_detail3,
-            self.infl_type,
-            self.infl_form,
-            self.base_form,
-            self.reading,
-            self.phoenetic
-        ]
+        out = self.__unicode__()
         if sys.version_info[0] == 2:
-            tmp = ['*' if a is None else a for a in tmp]
-            tmp = tuple(a.encode(formatspec) for a in tmp)
-        else:
-            tmp = tuple('*' if a is None else a for a in tmp)
-        
-        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+            out = out.encode(formatspec)
+
         return out
         
 
@@ -80,7 +72,7 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     """
     Tokenize a string 
 
-    :param x:         string
+    :param x:         unicode string
     :param mecab_enc: encoding mecab dictionary;
                       if None, automatically detected
     :param sysdic:    system dictionary directory
@@ -102,6 +94,9 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
         if line.strip()=="EOS":
             break
             
+        # skip if the line contains not tab, which should separate the surface and info
+        if line.find('\t') <= 0:
+            continue
         # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
         surface, info = line.split("\t")
         info = info.split(",")
