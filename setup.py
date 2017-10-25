@@ -9,7 +9,7 @@ setup(
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
     url='https://github.com/kota7/mecabwrap-py',
-    download_url='https://github.com/kota7/mecabwrap-py/archive/0.1.4.tar.gz',
+    download_url='https://github.com/kota7/mecabwrap-py/archive/0.1.5.tar.gz',
 
     packages=['mecabwrap'],
     install_requires=[],
