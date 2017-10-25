@@ -1,0 +1,32 @@
+environment:
+
+  matrix:
+
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+
+    - PYTHON: "C:\\Python26"
+    - PYTHON: "C:\\Python27"
+    - PYTHON: "C:\\Python33"
+    - PYTHON: "C:\\Python34"
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python26-x64"
+    - PYTHON: "C:\\Python27-x64"
+    - PYTHON: "C:\\Python33-x64"
+    - PYTHON: "C:\\Python34-x64"
+    - PYTHON: "C:\\Python35-x64"
+    - PYTHON: "C:\\Python36-x64"
+
+install:
+  - ps: tar -xvzf appveyor-ci/MeCab.tar.gz
+  - ps: mv MeCab "C:\\Program Files"
+  - set PATH=C:\\Program Files\MeCab\bin;%PATH%
+  - mecab -v
+  - ps: pip install pytest
+  - ps: pip install -U . 
+
+build: off
+
+test_script:
+- ps: pytest -v tests/
