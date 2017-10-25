@@ -59,7 +59,7 @@ class TestNoMeCab(unittest.TestCase):
         
         # put back mecab
         set_mecab('mecab')
-        self.asssertTrue(mecab_exists())
+        self.assertTrue(mecab_exists())
         
 if __name__ == '__main__':
     unittest.main()
