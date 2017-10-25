@@ -11,7 +11,7 @@ class Token:
     """
 
     def __init__(self, **kwargs):
-        # variables are stored as unicode
+        # note: variables are stored as unicode
         self.surface     = kwargs.pop('surface'    , None)
         self.pos         = kwargs.pop('pos'        , None)
         self.pos_detail1 = kwargs.pop('pos_detail1', None)
@@ -37,11 +37,6 @@ class Token:
             self.reading,
             self.phoenetic
         ]
-        #if sys.version_info[0] == 2:
-        #    tmp = ['*' if a is None else a for a in tmp]
-        #    tmp = tuple(a.encode('utf8') for a in tmp)
-        #else:
-        #    tmp = tuple('*' if a is None else a for a in tmp)
         tmp = tuple(u'*' if a is None else a for a in tmp)
         
         out = u'%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
@@ -56,25 +51,10 @@ class Token:
         
         :param formatspec:  encoding
         """
-        tmp = [
-            self.surface, 
-            self.pos,
-            self.pos_detail1,
-            self.pos_detail2,
-            self.pos_detail3,
-            self.infl_type,
-            self.infl_form,
-            self.base_form,
-            self.reading,
-            self.phoenetic
-        ]
+        out = self.__str__()
         if sys.version_info[0] == 2:
-            tmp = ['*' if a is None else a for a in tmp]
-            tmp = tuple(a.encode(formatspec) for a in tmp)
-        else:
-            tmp = tuple('*' if a is None else a for a in tmp)
-        
-        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+            out = out.encode(formatspec)
+
         return out
         
 
