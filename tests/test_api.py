@@ -13,19 +13,28 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(
             words, 
             [u'すもも', u'も', u'もも', u'も', u'もも', u'の', u'うち']
-        )
+         )
     
-    def test_print_unicode(self):
+    def test_unicode_type(self):
         """
-        print(token) should print unicode string
+        unicode(token) should give unicode string
         """
         tokens = tokenize(u'すもももももももものうち')
         for token in tokens:
-            s = token.__str__()
+            s = token.__unicode__()
             if sys.version_info[0] == 2:
                 self.assertTrue(isinstance(s, unicode))
             else:
                 self.assertTrue(isinstance(s, str))
+
+    def test_print_str(self):
+        """
+        print(token) should give str in both in python2 and 3
+        """
+        tokens = tokenize(u'すもももももももものうち')
+        for token in tokens:
+            s = token.__str__()
+            self.assertTrue(isinstance(s, str))
 
     def test_format_str(self):
         """

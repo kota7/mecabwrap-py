@@ -142,7 +142,7 @@ def do_mecab_iter(x, *args, **kwargs):
     # return if mecab does not exist
     if not mecab_exists():
         print(_no_mecab_message())
-        return u''
+        return
 
     byline    = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)

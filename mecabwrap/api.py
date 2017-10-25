@@ -24,7 +24,7 @@ class Token:
         self.phoenetic   = kwargs.pop('phoenetic'  , None)
 
 
-    def __str__(self):
+    def __unicode__(self):
         tmp = [
             self.surface, 
             self.pos,
@@ -42,6 +42,16 @@ class Token:
         out = u'%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
         return out
     
+    def __str__(self):
+        """
+        For python 3, returns unicode string
+        For python 2, returns utf-8 encoded string
+        To change the encoding, use `format`
+        """
+        out = self.__unicode__()
+        if sys.version_info[0] == 2:
+            out = out.encode('utf-8')
+        return out
     
     def __format__(self, formatspec):
         """
@@ -51,7 +61,7 @@ class Token:
         
         :param formatspec:  encoding
         """
-        out = self.__str__()
+        out = self.__unicode__()
         if sys.version_info[0] == 2:
             out = out.encode(formatspec)
 
