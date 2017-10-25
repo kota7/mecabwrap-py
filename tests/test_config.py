@@ -3,9 +3,9 @@
 
 
 import unittest
-from mecabwrap import tokenize
-from mecabwrap.globals import set_mecab
-from mecabwrap.globals import get_mecab
+import subprocess
+from mecabwrap import tokenize, do_mecab, do_mecab_vec, do_mecab_iter
+from mecabwrap.config import set_mecab, get_mecab
 
 
 class TestSetGet(unittest.TestCase):
@@ -20,7 +20,44 @@ class TestSetGet(unittest.TestCase):
 
         set_mecab("mecab")
 
-
+class TestNoMeCab(unittest.TestCase):
+    """
+    set `mecab` to a random command and
+    check the behavior of the functions
+    """
+    
+    def test_no_mecab(self):
+        # find a command that does not exist
+        command = 'mecabb'
+        while True:
+            try: 
+                p = subprocess.Popen([command])
+            except FileNotFoundError:
+                break
+            command += 'b'
+    
+        # set mecab to the invalid command
+        set_mecab(command)
+    
+        # tokenize should be contain no element
+        o = list(tokenize(u'すもももももももものうち'))
+        self.assertEqual(len(o), 0)
+    
+        # do_mecab should return an empty string
+        o = do_mecab(u'すもももももももものうち')
+        self.assertEqual(o, u'')
+    
+        # do_mecab_vec should also return an empty string
+        o = do_mecab_vec(u'すもももももももものうち')
+        self.assertEqual(o, u'')
+    
+        # do_mecab_iter should contain no element
+        o = list(do_mecab_iter(u'すもももももももものうち'))
+        self.assertEqual(len(o), 0)
+        
+        # put back mecab
+        set_mecab('mecab')
+        
 if __name__ == '__main__':
     unittest.main()
 

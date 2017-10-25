@@ -84,6 +84,9 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
         if line.strip()=="EOS":
             break
             
+        # skip if the line contains not tab, which should separate the surface and info
+        if line.find('\t') <= 0:
+            continue
         # 表層形\t品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
         surface, info = line.split("\t")
         info = info.split(",")
