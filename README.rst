@@ -55,7 +55,7 @@ or, from GitHub
 
     $ git clone --depth 1 https://github.com/kota7/mecabwrap-py.git
     $ cd mecabwrap-py
-    $ pip install .U
+    $ pip install -U .
 
 Quick Check
 -----------
