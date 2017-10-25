@@ -23,9 +23,9 @@ class TestTokenize(unittest.TestCase):
         for token in tokens:
             s = token.__str__()
             if sys.version_info[0] == 2:
-                self.assertTrue(isinstance(s, unicode))
+                self.assertIsInstance(s, unicode)
             else:
-                self.assertTrue(isinstance(s, str))
+                self.assertIsInstance(s, str)
 
     def test_format_str(self):
         """
@@ -34,7 +34,7 @@ class TestTokenize(unittest.TestCase):
         tokens = tokenize(u'すもももももももものうち')
         for token in tokens:
             s = token.__format__('utf-8')
-            self.assertTrue(isinstance(s, str))
+            self.assertIsInstance(s, str)
 
          
 
