@@ -32,7 +32,7 @@ class TestNoMeCab(unittest.TestCase):
         while True:
             try: 
                 p = subprocess.Popen([command])
-            except IOError:
+            except OSError:
                 break
             command += 'b'
         

@@ -16,7 +16,7 @@ def mecab_exists():
     command = [get_mecab(), "-v"] 
     try:
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
-    except IOError:
+    except OSError:
         return False
 
     out, err = p.communicate()
