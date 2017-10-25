@@ -11,6 +11,7 @@ class Token:
     """
 
     def __init__(self, **kwargs):
+        # variables are stored as unicode
         self.surface     = kwargs.pop('surface'    , None)
         self.pos         = kwargs.pop('pos'        , None)
         self.pos_detail1 = kwargs.pop('pos_detail1', None)
@@ -36,13 +37,14 @@ class Token:
             self.reading,
             self.phoenetic
         ]
-        if sys.version_info[0] == 2:
-            tmp = ['*' if a is None else a for a in tmp]
-            tmp = tuple(a.encode('utf8') for a in tmp)
-        else:
-            tmp = tuple('*' if a is None else a for a in tmp)
+        #if sys.version_info[0] == 2:
+        #    tmp = ['*' if a is None else a for a in tmp]
+        #    tmp = tuple(a.encode('utf8') for a in tmp)
+        #else:
+        #    tmp = tuple('*' if a is None else a for a in tmp)
+        tmp = tuple(u'*' if a is None else a for a in tmp)
         
-        out = '%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
+        out = u'%s\t%s,%s,%s,%s,%s,%s,%s,%s,%s' % tmp
         return out
     
     
@@ -80,7 +82,7 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     """
     Tokenize a string 
 
-    :param x:         string
+    :param x:         unicode string
     :param mecab_enc: encoding mecab dictionary;
                       if None, automatically detected
     :param sysdic:    system dictionary directory
