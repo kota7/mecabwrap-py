@@ -2,7 +2,11 @@
 mecabwrap
 =========
 
-|Build Status|
+.. image:: https://travis-ci.org/kota7/mecabwrap-py.svg?branch=master
+    :target: https://travis-ci.org/kota7/mecabwrap-py
+.. image:: https://ci.appveyor.com/api/projects/status/oidn1rfte6u8kavs/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/kota7/mecabwrap-py/branch/master
+
 
 **mecabwrap** is yet another Python interface to `MeCab Morphological
 Analyzer <http://taku910.github.io/mecab/>`__.
@@ -104,8 +108,5 @@ Finally, to verify that the package is success fully installed,
     の	助詞,連体化,*,*,*,*,の,ノ,ノ
     うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
 
-
-.. |Build Status| image:: https://travis-ci.org/kota7/mecabwrap-py.svg?branch=master
-   :target: https://travis-ci.org/kota7/mecabwrap-py
 
 
