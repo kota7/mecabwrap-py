@@ -11,7 +11,7 @@ mecabwrap
 **mecabwrap** is yet another Python interface to `MeCab Morphological
 Analyzer <http://taku910.github.io/mecab/>`__.
 
-It is designed to work seamlessly on Unix and Windows machine.
+Its goal is to provide intuitive APIs that work on Unix and Windows machines seamlessly.
 
 Requirement
 -----------
