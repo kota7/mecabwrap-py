@@ -13,6 +13,7 @@ setup(
 
     packages=['mecabwrap'],
     install_requires=[],
+    test_require=['pandas', 'numpy']
     package_data={},
     entry_points={},
     

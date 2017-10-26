@@ -17,6 +17,7 @@ before_install:
   #- if [ "$TRAVIS_OS_NAME" = "osx" ]  ; then brew install mecab mecab-ipadic; fi  
   
 install:
+  - pip install pandas numpy
   - pip install .
   
 #  - pip install -r requirements.txt
