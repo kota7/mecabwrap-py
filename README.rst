@@ -6,7 +6,8 @@ mecabwrap
     :target: https://travis-ci.org/kota7/mecabwrap-py
 .. image:: https://ci.appveyor.com/api/projects/status/oidn1rfte6u8kavs/branch/master?svg=true
     :target: https://ci.appveyor.com/project/kota7/mecabwrap-py/branch/master
-
+.. image:: https://badge.fury.io/py/mecabwrap.svg
+    :target: https://badge.fury.io/py/mecabwrap
 
 **mecabwrap** is yet another Python interface to `MeCab Morphological
 Analyzer <http://taku910.github.io/mecab/>`__.
