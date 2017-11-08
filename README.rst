@@ -65,7 +65,7 @@ or, from GitHub
 Quick Check
 -----------
 
-To verify that the MeCab has been sucessfully,
+Run the following to verify that the MeCab has been sucessfully:
 
 .. code:: bash
 
@@ -89,7 +89,7 @@ The code below verifies that MeCab works properly.
     # うち    名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
 
 
-Finally, to verify that the package is success fully installed,
+Finally, to verify that the package is successfully installed, run:
 
 .. code:: bash
 
