@@ -114,4 +114,4 @@ Finally, to verify that the package is successfully installed, run:
 Usage
 -----
 
-See the `Usage Notebook <notebook/usage.ipynb>__` for more detail.
+See the `Usage Notebook <notebook/usage.ipynb>`__ for more detail.
