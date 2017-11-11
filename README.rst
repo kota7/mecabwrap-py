@@ -1,4 +1,5 @@
 
+
 mecabwrap
 =========
 
@@ -110,4 +111,7 @@ Finally, to verify that the package is successfully installed, run:
     うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
 
 
+Usage
+-----
 
+See the `Usage Notebook <notebook/usage.ipynb>__` for more detail.
