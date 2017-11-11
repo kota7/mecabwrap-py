@@ -40,6 +40,15 @@ See also: [official website](http://taku910.github.io/mecab/#install)
 
 ### 2. Install this Package
 
+
+The package is now on [PyPI](https://pypi.python.org/pypi/mecabwrap/), so can be installed by `pip` command:
+
+```bash
+$ pip install mecabwrap
+```
+
+Or, the latest development version can be installed from the GitHub.
+
 ```bash
 $ git clone --depth 1 https://github.com/kota7/mecabwrap-py.git
 $ cd mecabwrap-py
@@ -50,29 +59,16 @@ $ pip install .U
 ## Quick Check
 
 
-Verify that the MeCab has been sucessfully installed by:
+Following command will print the MeCab version.
+Otherwise, you do not have MeCab installed or MeCab is not on the search path.
 
 ```bash
 $ mecab -v
 # should result in `mecab of 0.996` or similar.
 ```
 
-Otherwise, you do not have MeCab installed successfully or MeCab is not on the search path.
 
-
-```bash
-$ echo すもももももももものうち | mecab
-# すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
-# も	助詞,係助詞,*,*,*,*,も,モ,モ
-# もも	名詞,一般,*,*,*,*,もも,モモ,モモ
-# も	助詞,係助詞,*,*,*,*,も,モ,モ
-# もも	名詞,一般,*,*,*,*,もも,モモ,モモ
-# の	助詞,連体化,*,*,*,*,の,ノ,ノ
-# うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
-```
-
-
-To verify that the package if success fully installed,
+To verify that the package is successfully installed, try the following:
 
 ```bash
 $ python
@@ -209,7 +205,7 @@ for text in do_mecab_iter(ins, byline=False):
     EOS
 
 
-### Writing the outcome to file
+### Writing the outcome to a file
 
 To write the MeCab outcomes directly to a file, one may either use `-o` option or `outpath` argument.  Note that this does not work with `do_mecab_iter`, since it is designed to write the outcomes to a temporary file.
 

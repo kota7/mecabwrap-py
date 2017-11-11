@@ -66,31 +66,15 @@ or, from GitHub
 Quick Check
 -----------
 
-Run the following to verify that the MeCab has been sucessfully:
+Following command will print the MeCab version. Otherwise, you do not
+have MeCab installed or MeCab is not on the search path.
 
 .. code:: bash
 
     $ mecab -v
     # should result in `mecab of 0.996` or similar.
 
-If this causes error or gives an unexpected outcome, then it is either MeCab has not been installed or MeCab is not
-on the search path.
-
-The code below verifies that MeCab works properly.
-
-.. code:: bash
-
-    $ echo すもももももももものうち | mecab
-    # すもも   名詞,一般,*,*,*,*,すもも,スモモ,スモモ
-    # も 助詞,係助詞,*,*,*,*,も,モ,モ
-    # もも    名詞,一般,*,*,*,*,もも,モモ,モモ
-    # も 助詞,係助詞,*,*,*,*,も,モ,モ
-    # もも    名詞,一般,*,*,*,*,もも,モモ,モモ
-    # の 助詞,連体化,*,*,*,*,の,ノ,ノ
-    # うち    名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
-
-
-Finally, to verify that the package is successfully installed, run:
+To verify that the package is successfully installed, try the following:
 
 .. code:: bash
 
@@ -102,13 +86,13 @@ Finally, to verify that the package is successfully installed, run:
     >>> for token in tokenize(u"すもももももももものうち"): 
     ...     print(token)
     ... 
-    すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
-    も	助詞,係助詞,*,*,*,*,も,モ,モ
-    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
-    も	助詞,係助詞,*,*,*,*,も,モ,モ
-    もも	名詞,一般,*,*,*,*,もも,モモ,モモ
-    の	助詞,連体化,*,*,*,*,の,ノ,ノ
-    うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+    すもも 名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+    も   助詞,係助詞,*,*,*,*,も,モ,モ
+    もも  名詞,一般,*,*,*,*,もも,モモ,モモ
+    も   助詞,係助詞,*,*,*,*,も,モ,モ
+    もも  名詞,一般,*,*,*,*,もも,モモ,モモ
+    の   助詞,連体化,*,*,*,*,の,ノ,ノ
+    うち  名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
 
 
 Usage
