@@ -23,8 +23,10 @@ install:
   - ps: mv MeCab "C:\\Program Files"
   - set PATH=C:\\Program Files\MeCab\bin;%PATH%
   - mecab -v
-  - ps: pip install pytest numpy pandas
-  - ps: pip install -U . 
+  - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
+  - python -V
+  - ps: python -m pip install pytest numpy pandas
+  - ps: python -m pip install -U . 
 
 build: off
 
