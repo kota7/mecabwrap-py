@@ -25,8 +25,10 @@ install:
   - mecab -v
   - set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%
   - python -V
-  - ps: python -m pip install pytest numpy pandas
-  - ps: python -m pip install -U . 
+  - python -m pip install -U pip
+  - python -m pip install setuptools
+  - python -m pip install pytest numpy pandas
+  - python -m pip install -U . 
 
 build: off
 
