@@ -43,4 +43,4 @@ install:
 build: off
 
 test_script:
-- py.test -v tests/
+  - py.test -v tests/
