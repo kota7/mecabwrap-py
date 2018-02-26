@@ -80,7 +80,7 @@ def do_mecab(x, *args, **kwargs):
     
     #p.terminate()
     
-    return out.decode(mecab_enc)
+    return out.decode(mecab_enc, 'ignore')
 
 
 def do_mecab_vec(x, *args, **kwargs):
@@ -160,7 +160,7 @@ def do_mecab_iter(x, *args, **kwargs):
     with open(ofile, 'rb') as f:
         if byline:
             for line in f:
-                yield line.decode(mecab_enc).strip()
+                yield line.decode(mecab_enc, 'ignore').strip()
         else:
             EOS = get_mecab_opt('-E', *args)
             EOS = 'EOS' if EOS is None else EOS.strip()
@@ -168,12 +168,12 @@ def do_mecab_iter(x, *args, **kwargs):
             doc = b''
             for line in f:
                 doc += line
-                tmp = line.decode(mecab_enc).strip()
+                tmp = line.decode(mecab_enc, 'ignore').strip()
                 if tmp[(-len(EOS)):] == EOS:
-                    yield doc.decode(mecab_enc).strip()
+                    yield doc.decode(mecab_enc, 'ignore').strip()
                     doc = b''
             if len(doc) > 0:
-                yield(doc.decode(mecab_enc).strip())
+                yield(doc.decode(mecab_enc, 'ignore').strip())
 
     os.close(fd)
     os.remove(ofile)
