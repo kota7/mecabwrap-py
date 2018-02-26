@@ -38,7 +38,7 @@ install:
   - conda create -y -n test-env python=%PYTHON_VERSION%
   - conda -y install pip numpy pandas pytest
   - activate test-env
-  - python -m pip install -U .
+  - python -m pip install --no-deps -U .
 
 build: off
 
