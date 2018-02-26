@@ -94,12 +94,7 @@ class TestDomecabIter(unittest.TestCase):
             self.assertEqual(line[-3:], 'END')
         self.assertEqual(ct, 2)
     
-    def test_iter_Eopt_unicode(self):
-        # skip this test if encoding is not utf8
-        # even mecab application does not get this right
-        if codecs.lookup(detect_mecab_enc()).name != 'utf8':
-            return
-    
+    def test_iter_Eopt_unicode(self):    
         ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
         for line in do_mecab_iter(ins, u'-Eおしまい\n', byline=False):
