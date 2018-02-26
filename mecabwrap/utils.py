@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import sys
 import subprocess
 import re
 import argparse
@@ -55,33 +56,38 @@ def detect_mecab_enc(*args):
     
 
 # map short option name to long option name, type and store_true
+# set str type as unicode for python2
+_str_type = unicode if sys.version_info[0] == 2 else str
 _MECAB_OPTIONS = { 
-    '-r'  : ('--rcfile', str)
-    ,'-d' : ('--dicdir', str)
-    ,'-u' : ('--userdic', str)
+    '-r'  : ('--rcfile', _str_type)
+    ,'-d' : ('--dicdir', _str_type)
+    ,'-u' : ('--userdic', _str_type)
     ,'-l' : ('--lattice-level', int)
     ,'-D' : ('--dictionary-info', None)
-    ,'-O' : ('--output-format-type', str)
+    ,'-O' : ('--output-format-type', _str_type)
     ,'-a' : ('--all-morphs', None)
     ,'-N' : ('--nbest', int)
     ,'-p' : ('--partial', None)
     ,'-m' : ('--marginal', None)
     ,'-M' : ('--max-groupint-size', int)
-    ,'-F' : ('--node-format', str)
-    ,'-U' : ('--unk-format', str)
-    ,'-B' : ('--bos-format', str)
-    ,'-E' : ('--eos-format', str)
-    ,'-S' : ('--eon-format', str)
-    ,'-x' : ('--unk-feature', str)
+    ,'-F' : ('--node-format', _str_type)
+    ,'-U' : ('--unk-format', _str_type)
+    ,'-B' : ('--bos-format', _str_type)
+    ,'-E' : ('--eos-format', _str_type)
+    ,'-S' : ('--eon-format', _str_type)
+    ,'-x' : ('--unk-feature', _str_type)
     ,'-b' : ('--input-buffer-size', int)
     ,'-P' : ('--dump-config', None)
     ,'-C' : ('--allocate-sentence', None)
     ,'-t' : ('--theta', float)
     ,'-c' : ('--cost-factor', int)
-    ,'-o' : ('--output', str)
+    ,'-o' : ('--output', _str_type)
     ,'-v' : ('--version', None)
     #,'-h' : ('--help', None)
 }
+del(_str_type)
+
+
 _MECAB_ARG_PARSER = argparse.ArgumentParser()
 _MECAB_ARG_PARSER.add_argument('files', nargs='*')
 for short, item in _MECAB_OPTIONS.items():

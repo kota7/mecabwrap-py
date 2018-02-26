@@ -53,5 +53,14 @@ class TestMecabOption(unittest.TestCase):
         self.assertFalse(ret)
 
 
+    def test_unicode(self):
+        args = ['-E', u'終わりです！']
+        ret = get_mecab_opt('-E', *args)
+        self.assertEqual(ret, u'終わりです！')
+        
+        ret = get_mecab_opt('--eos-format', *args)
+        self.assertEqual(ret, u'終わりです！')
+
+
 if __name__ == '__main__':
     unittest.main()

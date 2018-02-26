@@ -83,7 +83,7 @@ class TestDomecabIter(unittest.TestCase):
         self.assertEqual(ct, 2)
 
         ct = 0
-        for line in do_mecab_iter(ins, u'--eos-format', 'おしまい\n', byline=False):
+        for line in do_mecab_iter(ins, '--eos-format', u'おしまい\n', byline=False):
             ct += 1 
             self.assertEqual(line[-4:], u'おしまい')
         self.assertEqual(ct, 2)
