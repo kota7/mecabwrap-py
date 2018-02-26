@@ -154,26 +154,34 @@ def do_mecab_iter(x, *args, **kwargs):
     # make a temp file for writing output
     fd, ofile = mkstemp()
 
+    # use temporary eos
+    EOS = get_mecab_opt('-E', *args)
+    EOS = 'EOS' if EOS is None else EOS.strip()
+    EOS_tmp = '___TEMPORARYENDOFSENTENCE___'
+    
+    args = list(args) + ['-E', EOS_tmp + '\n']
     do_mecab_vec(x, *args, outpath=ofile, mecab_enc=mecab_enc)
 
 
     with open(ofile, 'rb') as f:
         if byline:
             for line in f:
-                yield line.decode(mecab_enc, 'ignore').strip()
-        else:
-            EOS = get_mecab_opt('-E', *args)
-            EOS = 'EOS' if EOS is None else EOS.strip()
-
-            doc = b''
-            for line in f:
-                doc += line
                 tmp = line.decode(mecab_enc, 'ignore').strip()
-                if tmp[(-len(EOS)):] == EOS:
-                    yield doc.decode(mecab_enc, 'ignore').strip()
-                    doc = b''
+                tmp = tmp.replace(EOS_tmp, EOS)
+                yield tmp
+        else:
+            doc = u''
+            for line in f:
+                tmp = line.decode(mecab_enc, 'ignore').strip()
+                if tmp[(-len(EOS_tmp)):] == EOS_tmp:
+                    tmp = tmp[0:len(EOS_tmp)] + EOS
+                    doc += u'\n' + tmp
+                    yield doc
+                    doc = u''
+                else:
+                    doc += u'\n' + tmp
             if len(doc) > 0:
-                yield(doc.decode(mecab_enc, 'ignore').strip())
+                yield doc
 
     os.close(fd)
     os.remove(ofile)
