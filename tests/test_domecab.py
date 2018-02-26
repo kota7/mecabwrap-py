@@ -3,9 +3,9 @@
 
 import unittest
 import re
-from mecabwrap.domecab import do_mecab
-from mecabwrap.domecab import do_mecab_vec
-from mecabwrap.domecab import do_mecab_iter
+import codecs
+from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
+from mecabwrap.utils import detect_mecab_enc
 
 
 class TestDomecab(unittest.TestCase):
@@ -21,7 +21,13 @@ class TestDomecab(unittest.TestCase):
         words = re.findall(r'[^\t\n]+\t', out)
         words = [w[:-1] for w in words]
         self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
-
+    
+    def test_unicode(self):
+        out = do_mecab(u'メロンパンを食べる', '-E', u'おわり\n', '-B', u'はじまり\n')
+        words = re.findall(r'[^\t\n]+\t', out[1:-1])
+        words = [w[:-1] for w in words]
+        self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
+        
 
 class TestDomecabVec(unittest.TestCase):
     def test_vec(self):
@@ -89,6 +95,11 @@ class TestDomecabIter(unittest.TestCase):
         self.assertEqual(ct, 2)
     
     def test_iter_Eopt_unicode(self):
+        # skip this test if encoding is not utf8
+        # even mecab application does not get this right
+        if codecs.lookup(detect_mecab_enc()).name != 'utf8':
+            return
+    
         ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
         for line in do_mecab_iter(ins, u'-Eおしまい\n', byline=False):
