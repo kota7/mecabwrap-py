@@ -180,12 +180,12 @@ def do_mecab_iter(x, *args, **kwargs):
             for line in f:
                 tmp = line.decode(mecab_enc, 'ignore').strip()
                 if tmp[(-len(EOS_tmp)):] == EOS_tmp:
-                    tmp = tmp[0:len(EOS_tmp)] + EOS
-                    doc += u'\n' + tmp
+                    tmp = tmp[0:(-len(EOS_tmp))] + EOS
+                    doc += tmp
                     yield doc
                     doc = u''
                 else:
-                    doc += u'\n' + tmp
+                    doc += tmp + u'\n'
             if len(doc) > 0:
                 yield doc
 

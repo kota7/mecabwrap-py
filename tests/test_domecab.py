@@ -4,6 +4,7 @@
 import unittest
 import re
 import codecs
+import types
 from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
 from mecabwrap.utils import detect_mecab_enc
 
@@ -51,7 +52,21 @@ class TestDomecabVec(unittest.TestCase):
 
 
 class TestDomecabIter(unittest.TestCase):
+
     def test_iter(self):
+        ins = [u'アイスコーヒー', u'飲みたい']
+        it = do_mecab_iter(ins, '-F%m\n', byline=True)
+        self.assertTrue(isinstance(it, types.GeneratorType))
+        self.assertEqual(
+            list(it), [u'アイス', u'コーヒー', u'EOS', u'飲み', u'たい', u'EOS'])
+
+        ins = [u'ぶどうパン', u'食べたい']
+        it = do_mecab_iter(ins, '-F%m\n', byline=False)
+        self.assertTrue(isinstance(it, types.GeneratorType))
+        self.assertEqual(
+            list(it), [u'ぶどう\nパン\nEOS', u'食べ\nたい\nEOS'])
+            
+    def test_iter_count(self):
         ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
         for line in do_mecab_iter(ins, byline=False):
@@ -73,25 +88,25 @@ class TestDomecabIter(unittest.TestCase):
         ct = 0
         for line in do_mecab_iter(ins, '-EEND\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], 'END')
+            self.assertEqual(line[-4:], '\nEND')
         self.assertEqual(ct, 2)
 
         ct = 0
         for line in do_mecab_iter(ins, '-E', 'END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], 'END')
+            self.assertEqual(line[-4:], '\nEND')
         self.assertEqual(ct, 2)
         
         ct = 0
         for line in do_mecab_iter(ins, '--eos-format=END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], 'END')
+            self.assertEqual(line[-4:], '\nEND')
         self.assertEqual(ct, 2)
 
         ct = 0
         for line in do_mecab_iter(ins, '--eos-format', 'END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], 'END')
+            self.assertEqual(line[-4:], '\nEND')
         self.assertEqual(ct, 2)
     
     def test_iter_Eopt_unicode(self):    
@@ -99,25 +114,25 @@ class TestDomecabIter(unittest.TestCase):
         ct = 0
         for line in do_mecab_iter(ins, u'-Eおしまい\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-4:], u'おしまい')
+            self.assertEqual(line[-5:], u'\nおしまい')
         self.assertEqual(ct, 2)
 
         ct = 0
         for line in do_mecab_iter(ins, '-E', u'おしまい\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-4:], u'おしまい')
+            self.assertEqual(line[-5:], u'\nおしまい')
         self.assertEqual(ct, 2)
         
         ct = 0
         for line in do_mecab_iter(ins, u'--eos-format=おしまい\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-4:], u'おしまい')
+            self.assertEqual(line[-5:], u'\nおしまい')
         self.assertEqual(ct, 2)
 
         ct = 0
         for line in do_mecab_iter(ins, '--eos-format', u'おしまい\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-4:], u'おしまい')
+            self.assertEqual(line[-5:], u'\nおしまい')
         self.assertEqual(ct, 2)
 
         
