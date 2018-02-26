@@ -3,6 +3,7 @@
 
 import subprocess
 import re
+import argparse
 from .config import get_mecab
 
 
@@ -23,6 +24,7 @@ def mecab_exists():
     out = out.decode().strip()
     reg  = re.match(r'mecab', out)
     return (reg is not None)
+
 
 
 def detect_mecab_enc(*args):
@@ -63,6 +65,75 @@ def detect_mecab_enc(*args):
     return reg.group(1)
     
     
+
+# map short option name to long option name, type and store_true
+_MECAB_OPTIONS = { 
+    '-r'  : ('--rcfile', str)
+    ,'-d' : ('--dicdir', str)
+    ,'-u' : ('--userdic', str)
+    ,'-l' : ('--lattice-level', int)
+    ,'-D' : ('--dictionary-info', None)
+    ,'-O' : ('--output-format-type', str)
+    ,'-a' : ('--all-morphs', None)
+    ,'-N' : ('--nbest', int)
+    ,'-p' : ('--partial', None)
+    ,'-m' : ('--marginal', None)
+    ,'-M' : ('--max-groupint-size', int)
+    ,'-F' : ('--node-format', str)
+    ,'-U' : ('--unk-format', str)
+    ,'-B' : ('--bos-format', str)
+    ,'-E' : ('--eos-format', str)
+    ,'-S' : ('--eon-format', str)
+    ,'-x' : ('--unk-feature', str)
+    ,'-b' : ('--input-buffer-size', int)
+    ,'-P' : ('--dump-config', None)
+    ,'-C' : ('--allocate-sentence', None)
+    ,'-t' : ('--theta', float)
+    ,'-c' : ('--cost-factor', int)
+    ,'-o' : ('--output', str)
+    ,'-v' : ('--version', None)
+    #,'-h' : ('--help', None)
+}
+_MECAB_ARG_PARSER = argparse.ArgumentParser()
+_MECAB_ARG_PARSER.add_argument('files', nargs='*')
+for short, item in _MECAB_OPTIONS.items():
+    long, typ = item
+    if item[1] is None:
+        _MECAB_ARG_PARSER.add_argument(short, long, action='store_true')
+    else:
+        _MECAB_ARG_PARSER.add_argument(short, long, type=typ)
+
+
+def get_mecab_opt(option, *args):
+    """
+    parse and return mecab argument
+
+    :param opt:   string of target option; e.g. '-u', '--dicdir'
+    :param value: boolean; indicates if the option has a value 
+    :param *args: arguments passed to mecab
+
+    :return:  if value is True, then returns the option value if specified,
+              or None if not specified;
+              if value is False, then returns boolean indicating
+              if the option is specified
+    """
+    try:
+        args = _MECAB_ARG_PARSER.parse_args(args)
+    except Exception as e:
+        logger.error(e)
+        return None
+
+    # convert short option to long
+    if option[0:2] != '--':
+        option = _MECAB_OPTIONS[option][0]
+    name = option[2:].replace('-', '_')
+    try:
+        ret = vars(args)[name]
+    except Exception as e:
+        logger.error(e)
+        return None
+    return ret
+
     
 def _no_mecab_message():
     out = ['* `%s` is not recognized as a valid MeCab command' % get_mecab(),
