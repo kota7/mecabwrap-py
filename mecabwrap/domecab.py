@@ -169,6 +169,9 @@ def do_mecab_iter(x, *args, **kwargs):
                 if len(tmp) >= 3 and tmp[-3:] == 'EOS':
                     yield doc.decode(mecab_enc).strip()
                     doc = b''
+            if len(doc) > 0:
+                yield(doc)
+
     os.close(fd)
     os.remove(ofile)
 

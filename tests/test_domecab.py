@@ -56,9 +56,12 @@ class TestDomecabIter(unittest.TestCase):
         for line in do_mecab_iter(ins, '-Owakati', byline=True):
             ct += 1 
         self.assertEqual(ct, 2)
-
-
-
+        
+        ct = 0
+        for line in do_mecab_iter(ins, '-Owakati', byline=False):
+            ct += 1 
+        self.assertEqual(ct, 1)
+        
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
         out = do_mecab(u"すもももももももものうち", '-Bbegin\n', '-Eend\n')
