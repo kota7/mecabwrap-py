@@ -61,9 +61,6 @@ def do_mecab(x, *args, **kwargs):
     else:
         print("do we have python 4 now?")
     
-    # convert args into bytes
-    args = (a.encode(mecab_enc) for a in args)
-    
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
