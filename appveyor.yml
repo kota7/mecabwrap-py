@@ -35,11 +35,12 @@ install:
   # set up conda
   - set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
   - conda update -y conda
-  - conda create -y -n test-env python=%PYTHON_VERSION% pip numpy pandas pytest
+  - conda create -y -n test-env python=%PYTHON_VERSION%
+  - conda -y install pip numpy pandas pytest
   - activate test-env
   - python -m pip install -U .
 
 build: off
 
 test_script:
-- ps: pytest -v tests/
+- py.test -v tests/
