@@ -5,7 +5,8 @@ import sys
 import subprocess
 from tempfile import mkstemp
 from .config import get_mecab
-from .utils import mecab_exists, detect_mecab_enc, _no_mecab_message
+from .utils import mecab_exists, detect_mecab_enc
+from .utils import _no_mecab_message, get_mecab_opt
 
 
 # check the mecab command when imported
@@ -162,15 +163,18 @@ def do_mecab_iter(x, *args, **kwargs):
             for line in f:
                 yield line.decode(mecab_enc).strip()
         else:
+            EOS = get_mecab_opt('-E', *args)
+            EOS = 'EOS' if EOS is None else EOS.strip()
+
             doc = b''
             for line in f:
                 doc += line
                 tmp = line.decode(mecab_enc).strip()
-                if len(tmp) >= 3 and tmp[-3:] == 'EOS':
+                if tmp[(-len(EOS)):] == EOS:
                     yield doc.decode(mecab_enc).strip()
                     doc = b''
             if len(doc) > 0:
-                yield(doc)
+                yield(doc.decode(mecab_enc).strip())
 
     os.close(fd)
     os.remove(ofile)

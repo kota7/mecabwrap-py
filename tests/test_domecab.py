@@ -61,6 +61,22 @@ class TestDomecabIter(unittest.TestCase):
         for line in do_mecab_iter(ins, '-Owakati', byline=False):
             ct += 1 
         self.assertEqual(ct, 1)
+    
+    def test_iter_Eoption(self):
+        ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
+        ct = 0
+        for line in do_mecab_iter(ins, u'-Eおしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], u'おしまい')
+        self.assertEqual(ct, 2)
+
+        ct = 0
+        for line in do_mecab_iter(ins, '-E', u'おしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], u'おしまい')
+        self.assertEqual(ct, 2)
+        
+
         
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
