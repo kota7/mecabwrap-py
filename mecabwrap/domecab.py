@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import codecs
 from tempfile import mkstemp
 from .config import get_mecab
 from .utils import mecab_exists, detect_mecab_enc
@@ -50,16 +51,14 @@ def do_mecab(x, *args, **kwargs):
         mecab_enc = detect_mecab_enc(*args)
 
 
-    if sys.version_info[0] == 3:
-        assert isinstance(x, str), "x must be string"
-        assert outpath is None or isinstance(outpath, str)
-    elif sys.version_info[0] == 2:
+    if sys.version_info[0] == 2:
         assert isinstance(x, unicode), "x must be unicode string"
         assert outpath is None or \
                isinstance(outpath, str) or \
                isinstance(outpath, unicode) 
     else:
-        print("do we have python 4 now?")
+        assert isinstance(x, str), "x must be string"
+        assert outpath is None or isinstance(outpath, str)
     
     # conduct mecab if outfile is not None, 
     # then write it to the file;
@@ -67,6 +66,13 @@ def do_mecab(x, *args, **kwargs):
     command = [get_mecab()] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
+    
+    # for python 2.x, mecab_enc <> utf8,
+    # args with unicode raise UnicodeEncodeError
+    # a workaround seems to be converting them to bytes of mecab_enc
+    if sys.version_info[0] == 2 and codecs.lookup(mecab_enc).name != 'utf-8':
+        command = [a.encode(mecab_enc) if isinstance(a, unicode) else a \
+                   for a in command]
 
     p = subprocess.Popen(command, 
                          stdin=subprocess.PIPE,
