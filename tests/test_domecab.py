@@ -65,27 +65,27 @@ class TestDomecabIter(unittest.TestCase):
     def test_iter_Eopt(self):
         ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
-        for line in do_mecab_iter(ins, u'-EEND\n', byline=False):
+        for line in do_mecab_iter(ins, '-EEND\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], u'END')
+            self.assertEqual(line[-3:], 'END')
         self.assertEqual(ct, 2)
 
         ct = 0
-        for line in do_mecab_iter(ins, '-E', u'END\n', byline=False):
+        for line in do_mecab_iter(ins, '-E', 'END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], u'END')
+            self.assertEqual(line[-3:], 'END')
         self.assertEqual(ct, 2)
         
         ct = 0
-        for line in do_mecab_iter(ins, u'--eos-format=END\n', byline=False):
+        for line in do_mecab_iter(ins, '--eos-format=END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], u'END')
+            self.assertEqual(line[-3:], 'END')
         self.assertEqual(ct, 2)
 
         ct = 0
-        for line in do_mecab_iter(ins, '--eos-format', u'END\n', byline=False):
+        for line in do_mecab_iter(ins, '--eos-format', 'END\n', byline=False):
             ct += 1 
-            self.assertEqual(line[-3:], u'END')
+            self.assertEqual(line[-3:], 'END')
         self.assertEqual(ct, 2)
     
     def test_iter_Eopt_unicode(self):
