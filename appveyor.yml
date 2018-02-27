@@ -1,32 +1,55 @@
+# references
+# http://tjelvarolsson.com/blog/how-to-continuously-test-your-python-code-on-windows-using-appveyor/
+# https://github.com/appveyor/ci/issues/359
+
 environment:
 
   matrix:
 
-    # For Python versions available on Appveyor, see
-    # http://www.appveyor.com/docs/installed-software#python
+    - PYTHON_VERSION: 2.6
+      MINICONDA: "C:\\Miniconda-x64"
+    - PYTHON_VERSION: 2.7
+      MINICONDA: "C:\\Miniconda-x64"
+    - PYTHON_VERSION: 3.3
+      MINICONDA: "C:\\Miniconda3-x64"
+    - PYTHON_VERSION: 3.4
+      MINICONDA: "C:\\Miniconda3-x64"
+    - PYTHON_VERSION: 3.5
+      MINICONDA: "C:\\Miniconda3-x64"
+    - PYTHON_VERSION: 3.6
+      MINICONDA: "C:\\Miniconda3-x64"
 
-    - PYTHON: "C:\\Python26"
-    - PYTHON: "C:\\Python27"
-    - PYTHON: "C:\\Python33"
-    - PYTHON: "C:\\Python34"
-    - PYTHON: "C:\\Python35"
-    - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python26-x64"
-    - PYTHON: "C:\\Python27-x64"
-    - PYTHON: "C:\\Python33-x64"
-    - PYTHON: "C:\\Python34-x64"
-    - PYTHON: "C:\\Python35-x64"
-    - PYTHON: "C:\\Python36-x64"
+    - PYTHON_VERSION: 2.6
+      MINICONDA: "C:\\Miniconda"
+    - PYTHON_VERSION: 2.7
+      MINICONDA: "C:\\Miniconda"
+    - PYTHON_VERSION: 3.3
+      MINICONDA: "C:\\Miniconda3"
+    - PYTHON_VERSION: 3.4
+      MINICONDA: "C:\\Miniconda3"
+    - PYTHON_VERSION: 3.5
+      MINICONDA: "C:\\Miniconda3"
+    - PYTHON_VERSION: 3.6
+      MINICONDA: "C:\\Miniconda3"
 
+init:
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
+  
 install:
+  # set up mecab
   - ps: tar -xvzf appveyor-ci/MeCab.tar.gz
   - ps: mv MeCab "C:\\Program Files"
   - set PATH=C:\\Program Files\MeCab\bin;%PATH%
   - mecab -v
-  - ps: pip install pytest numpy pandas
-  - ps: pip install -U . 
+  
+  # set up conda
+  - set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%
+  - conda update -y conda
+  - conda create -y -n test-env python=%PYTHON_VERSION%
+  - activate test-env
+  - conda install -y pip numpy pandas pytest
 
 build: off
 
 test_script:
-- ps: pytest -v tests/
+  - py.test -v tests/

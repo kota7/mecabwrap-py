@@ -3,9 +3,10 @@
 
 import unittest
 import re
-from mecabwrap.domecab import do_mecab
-from mecabwrap.domecab import do_mecab_vec
-from mecabwrap.domecab import do_mecab_iter
+import codecs
+import types
+from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
+from mecabwrap.utils import detect_mecab_enc
 
 
 class TestDomecab(unittest.TestCase):
@@ -21,7 +22,13 @@ class TestDomecab(unittest.TestCase):
         words = re.findall(r'[^\t\n]+\t', out)
         words = [w[:-1] for w in words]
         self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
-
+    
+    def test_unicode(self):
+        out = do_mecab(u'メロンパンを食べる', '-E', u'おわり\n', '-B', u'はじまり\n')
+        words = re.findall(r'[^\t\n]+\t', out[1:-1])
+        words = [w[:-1] for w in words]
+        self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
+        
 
 class TestDomecabVec(unittest.TestCase):
     def test_vec(self):
@@ -45,7 +52,21 @@ class TestDomecabVec(unittest.TestCase):
 
 
 class TestDomecabIter(unittest.TestCase):
+
     def test_iter(self):
+        ins = [u'アイスコーヒー', u'飲みたい']
+        it = do_mecab_iter(ins, '-F%m\n', byline=True)
+        self.assertTrue(isinstance(it, types.GeneratorType))
+        self.assertEqual(
+            list(it), [u'アイス', u'コーヒー', u'EOS', u'飲み', u'たい', u'EOS'])
+
+        ins = [u'ぶどうパン', u'食べたい']
+        it = do_mecab_iter(ins, '-F%m\n', byline=False)
+        self.assertTrue(isinstance(it, types.GeneratorType))
+        self.assertEqual(
+            list(it), [u'ぶどう\nパン\nEOS', u'食べ\nたい\nEOS'])
+            
+    def test_iter_count(self):
         ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
         ct = 0
         for line in do_mecab_iter(ins, byline=False):
@@ -56,9 +77,65 @@ class TestDomecabIter(unittest.TestCase):
         for line in do_mecab_iter(ins, '-Owakati', byline=True):
             ct += 1 
         self.assertEqual(ct, 2)
+        
+        ct = 0
+        for line in do_mecab_iter(ins, '-Owakati', byline=False):
+            ct += 1 
+        self.assertEqual(ct, 1)
 
+    def test_iter_Eopt(self):
+        ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
+        ct = 0
+        for line in do_mecab_iter(ins, '-EEND\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], '\nEND')
+        self.assertEqual(ct, 2)
 
+        ct = 0
+        for line in do_mecab_iter(ins, '-E', 'END\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], '\nEND')
+        self.assertEqual(ct, 2)
+        
+        ct = 0
+        for line in do_mecab_iter(ins, '--eos-format=END\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], '\nEND')
+        self.assertEqual(ct, 2)
 
+        ct = 0
+        for line in do_mecab_iter(ins, '--eos-format', 'END\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-4:], '\nEND')
+        self.assertEqual(ct, 2)
+    
+    def test_iter_Eopt_unicode(self):    
+        ins = [u'となりの客はよく柿食う客だ', u'バスガス爆発']
+        ct = 0
+        for line in do_mecab_iter(ins, u'-Eおしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-5:], u'\nおしまい')
+        self.assertEqual(ct, 2)
+
+        ct = 0
+        for line in do_mecab_iter(ins, '-E', u'おしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-5:], u'\nおしまい')
+        self.assertEqual(ct, 2)
+        
+        ct = 0
+        for line in do_mecab_iter(ins, u'--eos-format=おしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-5:], u'\nおしまい')
+        self.assertEqual(ct, 2)
+
+        ct = 0
+        for line in do_mecab_iter(ins, '--eos-format', u'おしまい\n', byline=False):
+            ct += 1 
+            self.assertEqual(line[-5:], u'\nおしまい')
+        self.assertEqual(ct, 2)
+
+        
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
         out = do_mecab(u"すもももももももものうち", '-Bbegin\n', '-Eend\n')

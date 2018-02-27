@@ -3,9 +3,11 @@
 import os
 import sys
 import subprocess
+import codecs
 from tempfile import mkstemp
 from .config import get_mecab
-from .utils import mecab_exists, detect_mecab_enc, _no_mecab_message
+from .utils import mecab_exists, detect_mecab_enc
+from .utils import _no_mecab_message, get_mecab_opt
 
 
 # check the mecab command when imported
@@ -49,24 +51,28 @@ def do_mecab(x, *args, **kwargs):
         mecab_enc = detect_mecab_enc(*args)
 
 
-    if sys.version_info[0] == 3:
-        assert isinstance(x, str), "x must be string"
-        assert outpath is None or isinstance(outpath, str)
-    elif sys.version_info[0] == 2:
+    if sys.version_info[0] == 2:
         assert isinstance(x, unicode), "x must be unicode string"
         assert outpath is None or \
                isinstance(outpath, str) or \
                isinstance(outpath, unicode) 
     else:
-        print("do we have python 4 now?")
-            
-
+        assert isinstance(x, str), "x must be string"
+        assert outpath is None or isinstance(outpath, str)
+    
     # conduct mecab if outfile is not None, 
     # then write it to the file;
     # otherwise do with no option
     command = [get_mecab()] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
+    
+    # for python 2.x, mecab_enc <> utf8,
+    # args with unicode raise UnicodeEncodeError
+    # a workaround seems to be converting them to bytes of mecab_enc
+    if sys.version_info[0] == 2 and codecs.lookup(mecab_enc).name != 'utf-8':
+        command = [a.encode(mecab_enc) if isinstance(a, unicode) else a \
+                   for a in command]
 
     p = subprocess.Popen(command, 
                          stdin=subprocess.PIPE,
@@ -80,7 +86,7 @@ def do_mecab(x, *args, **kwargs):
     
     #p.terminate()
     
-    return out.decode(mecab_enc)
+    return out.decode(mecab_enc, 'ignore')
 
 
 def do_mecab_vec(x, *args, **kwargs):
@@ -154,21 +160,35 @@ def do_mecab_iter(x, *args, **kwargs):
     # make a temp file for writing output
     fd, ofile = mkstemp()
 
+    # use temporary eos
+    EOS = get_mecab_opt('-E', *args)
+    EOS = 'EOS' if EOS is None else EOS.strip()
+    EOS_tmp = '___TEMPORARYENDOFSENTENCE___'
+    
+    args = list(args) + ['-E', EOS_tmp + '\n']
     do_mecab_vec(x, *args, outpath=ofile, mecab_enc=mecab_enc)
 
 
     with open(ofile, 'rb') as f:
         if byline:
             for line in f:
-                yield line.decode(mecab_enc).strip()
+                tmp = line.decode(mecab_enc, 'ignore').strip()
+                tmp = tmp.replace(EOS_tmp, EOS)
+                yield tmp
         else:
-            doc = b''
+            doc = u''
             for line in f:
-                doc += line
-                tmp = line.decode(mecab_enc).strip()
-                if len(tmp) >= 3 and tmp[-3:] == 'EOS':
-                    yield doc.decode(mecab_enc).strip()
-                    doc = b''
+                tmp = line.decode(mecab_enc, 'ignore').strip()
+                if tmp[(-len(EOS_tmp)):] == EOS_tmp:
+                    tmp = tmp[0:(-len(EOS_tmp))] + EOS
+                    doc += tmp
+                    yield doc
+                    doc = u''
+                else:
+                    doc += tmp + u'\n'
+            if len(doc) > 0:
+                yield doc
+
     os.close(fd)
     os.remove(ofile)
 
