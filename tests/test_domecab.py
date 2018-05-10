@@ -53,7 +53,7 @@ class TestDomecabVec(unittest.TestCase):
     def test_linebreak(self):
         ins = [u'今日は\n赤ちゃん', u'私が\rママよ']
         out = do_mecab_vec(ins)
-        eos = re.findall(r'EOS\n', out)
+        eos = re.findall(r'EOS[\r]{0,1}\n', out)
         self.assertEqual(len(eos), 2, out)
 
         out = do_mecab_vec(ins, '-Owakati')
