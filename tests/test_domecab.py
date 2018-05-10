@@ -50,6 +50,16 @@ class TestDomecabVec(unittest.TestCase):
         self.assertEqual(lines[3], 'EOS')
         self.assertEqual(lines[9], 'EOS')
 
+    def test_linebreak(self):
+        ins = [u'今日は\n赤ちゃん', u'私が\rママよ']
+        out = do_mecab_vec(ins)
+        eos = re.findall(r'EOS\n', out)
+        self.assertEqual(len(eos), 2)
+
+        out = do_mecab_vec(ins, '-Owakati')
+        split = out.strip().split('\n')
+        self.assertEqual(len(split), 2)
+
 
 class TestDomecabIter(unittest.TestCase):
 
@@ -135,7 +145,15 @@ class TestDomecabIter(unittest.TestCase):
             self.assertEqual(line[-5:], u'\nおしまい')
         self.assertEqual(ct, 2)
 
+    def test_linebreak(self):
+        ins = [u'今日は\n赤ちゃん', u'私が\rママよ']
+        out = list(do_mecab_iter(ins, byline=False))
+        self.assertEqual(len(out), 2)
+
+        out = list(do_mecab_iter(ins, '-Owakati', byline=True))
+        self.assertEqual(len(out), 2)
         
+
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
         out = do_mecab(u"すもももももももものうち", '-Bbegin\n', '-Eend\n')

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 import sys
 import subprocess
 import codecs
@@ -116,16 +117,21 @@ def do_mecab_vec(x, *args, **kwargs):
         mecab_enc = detect_mecab_enc(*args)
 
     # write x to a temp file
+    # this is slightly faster when input size gets large
     fd, infile = mkstemp()
     with open(infile, "wb") as f:
-        for txt in x:
-            f.write((txt + '\n').encode(mecab_enc))
-    
+        txt = '\n'.join(a.replace('\n', ' ') for a in x) 
+        f.write((txt + '\n').encode(mecab_enc))
     out = do_mecab(u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
-    
     # make sure the temp file is removed    
     os.close(fd)
     os.remove(infile)
+
+    # pass the text directly
+    # this is faster when input size is small
+    #y = '\n'.join(a.replace('\n', ' ') for a in x) 
+    #out = do_mecab(y, *args, outpath=outpath, mecab_enc=mecab_enc)
+
     
     return out
 
