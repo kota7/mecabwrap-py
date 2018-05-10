@@ -98,4 +98,4 @@ To verify that the package is successfully installed, try the following:
 Usage
 -----
 
-See the `Usage Notebook <notebook/usage.ipynb>`__ for more detail.
+Visit the `project page <https://kota7.github.io/mecabwrap-py/>`__ for more detail.
