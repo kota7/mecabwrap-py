@@ -171,11 +171,13 @@ def do_mecab_vec(x, *args, **kwargs):
         f.write(txt)
 
     if bopt:
-        out = do_mecab(u'', '-b' + str(bopt), infile, *args, 
-                       outpath=outpath, mecab_enc=mecab_enc)
+        args = list(args) + ['-b', str(bopt)]
+        out = do_mecab(
+            u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
     else:
-        out = do_mecab(u'', infile, *args, 
-                       outpath=outpath, mecab_enc=mecab_enc)
+        out = do_mecab(
+            u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
+
     # make sure the temp file is removed    
     os.close(fd)
     os.remove(infile)
