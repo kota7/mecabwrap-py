@@ -3,13 +3,16 @@
 import os
 import re
 import sys
+from logging import getLogger
 import subprocess
 import codecs
+import warnings
 from tempfile import mkstemp
 from .config import get_mecab
 from .utils import mecab_exists, detect_mecab_enc
 from .utils import _no_mecab_message, get_mecab_opt
 
+logger = getLogger(__name__)
 
 # check the mecab command when imported
 if not mecab_exists():
@@ -100,6 +103,10 @@ def do_mecab_vec(x, *args, **kwargs):
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
                       - mecab_enc (default: None) : encoding of mecab
+                      - buffer_size (default: None): if None, default value
+                        is used for `--input-buffer-size` option; if 'auto,
+                        necessary buffer size is chosen. if integer, it is
+                        used as the option
  
     :return:          result of mecab call in unicode string
     """
@@ -111,18 +118,64 @@ def do_mecab_vec(x, *args, **kwargs):
 
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
+    buffer_size = kwargs.pop('buffer_size', None)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
         mecab_enc = detect_mecab_enc(*args)
 
+    # set "-b" option
+    max_input_size = max(len(a.encode(mecab_enc)) for a in x)
+    if buffer_size is None:
+        bopt = None 
+    elif buffer_size == 'auto':
+        bopt = max_input_size + 1
+        logger.debug('bopt is set to %d', bopt)
+    elif isinstance(buffer_size, int):
+        bopt = buffer_size
+    else:
+        logger.warning(
+            'unknown buffer_size option %s; bopt is set to None', buffer_size)
+        bopt = None 
+
+    default_buff_size = 8192
+    maximum_buff_size = 8192 * 640
+    # bopt_ is same as bopt, except it has default value instead of None
+    bopt_ = bopt if bopt else default_buff_size
+    if bopt_ > maximum_buff_size:
+        logger.warn('%d is truncated to maximum possible buffer size (%d)',
+                    bopt_, maximum_buff_size)
+        warnings.warn('%d is truncated to maximum possible buffer size (%d)' % \
+                      (bopt_, maximum_buff_size))
+        bopt_ = maximum_buff_size
+        
+    if bopt_ <= max_input_size:
+        logger.warn('buffer size (%d) <= max input size (%d)', 
+                    bopt_, max_input_size)    
+        warnings.warn(
+            ('buffer size (%d) <= max input size (%d). ' + \
+             'some text will be truncated') % (bopt_, max_input_size))
+    else:
+        logger.debug('buffer size (%d) > max input size (%d)', 
+                     bopt_, max_input_size)    
+
+
     # write x to a temp file
     # this is slightly faster when input size gets large
     fd, infile = mkstemp()
     with open(infile, "wb") as f:
-        txt = '\n'.join(a.replace('\n', ' ') for a in x) 
-        f.write((txt + '\n').encode(mecab_enc))
-    out = do_mecab(u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
+        # truncate text
+        xb = [a.replace('\n', ' ').encode(mecab_enc) for a in x] 
+        xb = [a[0:(bopt_ - 1)] for a in xb]
+        txt = b'\n'.join(xb) + b'\n'
+        f.write(txt)
+
+    if bopt:
+        out = do_mecab(u'', '-b' + str(bopt), infile, *args, 
+                       outpath=outpath, mecab_enc=mecab_enc)
+    else:
+        out = do_mecab(u'', infile, *args, 
+                       outpath=outpath, mecab_enc=mecab_enc)
     # make sure the temp file is removed    
     os.close(fd)
     os.remove(infile)
@@ -147,6 +200,10 @@ def do_mecab_iter(x, *args, **kwargs):
                         the returned generator yields one line at at time;
                         otherwise, it yields a chunk up to 'EOS' at a time
                       - mecab_enc (default: None) : encoding of mecab
+                      - buffer_size (default: None): if None, default value
+                        is used for `--input-buffer-size` option; if 'auto,
+                        necessary buffer size is chosen. if integer, it is
+                        used as the option
 
     :return:          generator of mecab outcomes
     """
@@ -158,6 +215,7 @@ def do_mecab_iter(x, *args, **kwargs):
 
     byline    = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)
+    buffer_size = kwargs.pop('buffer_size', None)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
@@ -172,7 +230,8 @@ def do_mecab_iter(x, *args, **kwargs):
     EOS_tmp = '___TEMPORARYENDOFSENTENCE___'
     
     args = list(args) + ['-E', EOS_tmp + '\n']
-    do_mecab_vec(x, *args, outpath=ofile, mecab_enc=mecab_enc)
+    do_mecab_vec(
+        x, *args, outpath=ofile, mecab_enc=mecab_enc, buffer_size=buffer_size)
 
 
     with open(ofile, 'rb') as f:

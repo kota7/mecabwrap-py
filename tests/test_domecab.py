@@ -5,6 +5,7 @@ import unittest
 import re
 import codecs
 import types
+import warnings
 from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
 from mecabwrap.utils import detect_mecab_enc
 
@@ -51,6 +52,7 @@ class TestDomecabVec(unittest.TestCase):
         self.assertEqual(lines[9], 'EOS')
 
     def test_linebreak(self):
+        # vector element containing line break
         ins = [u'今日は\n赤ちゃん', u'私が\rママよ']
         out = do_mecab_vec(ins)
         eos = re.findall(r'EOS[\r]{0,1}\n', out)
@@ -59,6 +61,63 @@ class TestDomecabVec(unittest.TestCase):
         out = do_mecab_vec(ins, '-Owakati')
         split = out.strip().split('\n')
         self.assertEqual(len(split), 2, out)
+
+    def test_large_input(self):
+        enc = detect_mecab_enc()
+        x = u'すもももももももものうち!'
+        bx = len(x.encode(enc))
+        # repeat this until it is over 20000 bytes
+        tgt = 20000
+        rep = int(tgt / bx + 1)
+        y = x * rep  
+        by = len(y.encode(enc))
+
+        # make sure that the computation above works for all platform
+        self.assertTrue(by > tgt)
+        
+        # option "auto" should set the input buffer size 
+        # so entire string is regarded as a "sentense"
+        out = do_mecab_vec([y], '-Owakati', buffer_size='auto')
+        eos = re.findall(r'\n', out)
+        self.assertEqual(len(eos), 1, 'length of out should equal 1')
+        # make sure that entire strings are parsed by testing the
+        # number of '!' is equal to rep
+        num = re.findall(r'!', out)
+        self.assertEqual(len(num), rep)
+
+        # if we set the buffer size larger than the input, 
+        # then we should get the same result as 'auto'
+        out1 = do_mecab_vec([y], '-Owakati', buffer_size=by+1)
+        out2 = do_mecab_vec([y], '-Owakati', buffer_size=by+2)
+        self.assertEqual(out, out1)
+        self.assertEqual(out, out2)
+        
+        # if we set the buffer size smaller or equal, 
+        # we should get truncated outcome with a warning
+        with warnings.catch_warnings(record=True) as w:
+            out3 = do_mecab_vec([y], '-Owakati', buffer_size=by)
+            self.assertEqual(len(w), 1)
+        with warnings.catch_warnings(record=True) as w:
+            out4 = do_mecab_vec([y], '-Owakati', buffer_size=by-1)
+            self.assertEqual(len(w), 1)
+
+        eos = re.findall(r'\n', out3)
+        self.assertEqual(len(eos), 1, 'length of out3 should equal 1')
+        eos = re.findall(r'\n', out4)
+        self.assertEqual(len(eos), 1, 'length of out4 should equal 1')
+        self.assertNotEqual(out, out3)
+        self.assertNotEqual(out, out4)
+        self.assertNotEqual(out3, out4)
+        
+        # if we don't set buffer size, then we will use the default value,
+        # 8192. Since this is smaller than this input size, we expect warning,
+        # but still outcome length is one, but truncated
+        with warnings.catch_warnings(record=True) as w:
+            out5 = do_mecab_vec([y], '-Owakati')
+            self.assertEqual(len(w), 1)
+        eos = re.findall(r'\n', out5)
+        self.assertEqual(len(eos), 1, 'length of out5 should equal 1')
+        self.assertNotEqual(out, out5)
 
 
 class TestDomecabIter(unittest.TestCase):
@@ -153,6 +212,65 @@ class TestDomecabIter(unittest.TestCase):
         out = list(do_mecab_iter(ins, '-Owakati', byline=True))
         self.assertEqual(len(out), 2, out)
         
+    def test_large_input(self):
+        enc = detect_mecab_enc()
+        x = u'隣の客はよく柿食う客かな?'
+        bx = len(x.encode(enc))
+        # repeat this until it is over 30000 bytes
+        tgt = 30000
+        rep = int(tgt / bx + 1)
+        y = x * rep  
+        by = len(y.encode(enc))
+
+        # make sure that the computation above works for all platform
+        self.assertTrue(by > tgt)
+        
+        # option "auto" should set the input buffer size 
+        # so entire string is regarded as a "sentense"
+        out = do_mecab_iter([y], '-Owakati', byline=True, buffer_size='auto')
+        out = list(out)
+        self.assertEqual(len(out), 1, 'length of out should equal 1')
+        # make sure that entire strings are parsed by testing the
+        # number of '?' is equal to rep
+        num = re.findall(r'\?', out[0])
+        self.assertEqual(len(num), rep)
+
+        # if we set the buffer size larger than the input, 
+        # then we should get the same result as 'auto'
+        out1 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by+1)
+        out1 = list(out1)
+        out2 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by+2)
+        out2 = list(out2)
+        self.assertEqual(out, out1)
+        self.assertEqual(out, out2)
+        
+        # if we set the buffer size smaller or equal, 
+        # we should get truncated outcome with a warning
+        with warnings.catch_warnings(record=True) as w:
+            out3 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by)
+            out3 = list(out3)
+            self.assertEqual(len(w), 1)
+        with warnings.catch_warnings(record=True) as w:
+            out4 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by-1)
+            out4 = list(out4)
+            self.assertEqual(len(w), 1)
+
+        self.assertEqual(len(out3), 1, 'length of out3 should equal 1')
+        self.assertEqual(len(out4), 1, 'length of out4 should equal 1')
+        self.assertNotEqual(out, out3)
+        self.assertNotEqual(out, out4)
+        self.assertNotEqual(out3, out4)
+        
+        # if we don't set buffer size, then we will use the default value,
+        # 8192. Since this is smaller than this input size, we expect warning,
+        # but still outcome length is one, but truncated
+        with warnings.catch_warnings(record=True) as w:
+            out5 = do_mecab_iter([y], '-Owakati', byline=True)
+            out5 = list(out5)
+            self.assertEqual(len(w), 1)
+        self.assertEqual(len(out), 1, 'length of out5 should equal 1')
+        self.assertNotEqual(out, out5)
+
 
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):
