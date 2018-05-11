@@ -8,6 +8,7 @@ from mecabwrap.utils import *
 class TestMecabOption(unittest.TestCase):
     def test_opt(self):
         args = ['-d', 'foo', 
+                '-Bbar',
                 '--output-format-type=wakati', 
                 '--eos-format', 'END',
                 '-p', '--dump-config']  
@@ -16,6 +17,11 @@ class TestMecabOption(unittest.TestCase):
         self.assertEqual(ret, 'foo')
         ret = get_mecab_opt('--dicdir', *args)
         self.assertEqual(ret, 'foo')
+
+        ret = get_mecab_opt('-B', *args)
+        self.assertEqual(ret, 'bar')
+        ret = get_mecab_opt('--bos-format', *args)
+        self.assertEqual(ret, 'bar')
 
         ret = get_mecab_opt('-O', *args)
         self.assertEqual(ret, 'wakati')
@@ -54,13 +60,17 @@ class TestMecabOption(unittest.TestCase):
 
 
     def test_unicode(self):
-        args = ['-E', u'終わりです！']
+        args = ['-E', u'終わりです！', u'-Bここから']
+
         ret = get_mecab_opt('-E', *args)
         self.assertEqual(ret, u'終わりです！')
-        
         ret = get_mecab_opt('--eos-format', *args)
         self.assertEqual(ret, u'終わりです！')
 
+        ret = get_mecab_opt('-B', *args)
+        self.assertEqual(ret, u'ここから')
+        ret = get_mecab_opt('--bos-format', *args)
+        self.assertEqual(ret, u'ここから')
 
 if __name__ == '__main__':
     unittest.main()
