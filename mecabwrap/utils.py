@@ -91,11 +91,11 @@ del(_str_type)
 _MECAB_ARG_PARSER = argparse.ArgumentParser()
 _MECAB_ARG_PARSER.add_argument('files', nargs='*')
 for short, item in _MECAB_OPTIONS.items():
-    long, typ = item
+    long_, typ = item
     if item[1] is None:
-        _MECAB_ARG_PARSER.add_argument(short, long, action='store_true')
+        _MECAB_ARG_PARSER.add_argument(short, long_, action='store_true')
     else:
-        _MECAB_ARG_PARSER.add_argument(short, long, type=typ)
+        _MECAB_ARG_PARSER.add_argument(short, long_, type=typ)
 
 
 def get_mecab_opt(option, *args):
