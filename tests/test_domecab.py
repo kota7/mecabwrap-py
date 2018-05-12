@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+import os
 import re
 import codecs
+import tempfile
 import types
 import warnings
 from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
@@ -30,6 +32,64 @@ class TestDomecab(unittest.TestCase):
         words = [w[:-1] for w in words]
         self.assertEqual(words, [u'メロン', u'パン', u'を', u'食べる'])
         
+    def test_outfile_and_o(self):
+        # generate filenames that do not exist
+        path1 = tempfile.mktemp()
+        path2 = tempfile.mktemp()
+        path3 = tempfile.mktemp()
+        # make sure they don't exist
+        self.assertFalse(os.path.exists(path1))
+        self.assertFalse(os.path.exists(path2))
+        self.assertFalse(os.path.exists(path3))
+        
+        ret1 = do_mecab(u'赤巻紙青巻紙', outpath=path1)
+        ret2 = do_mecab(u'赤巻紙青巻紙', '-o', path2)
+        ret3 = do_mecab(u'赤巻紙青巻紙', '--output', path3)
+        # confirm files are created 
+        self.assertTrue(os.path.exists(path1))
+        self.assertTrue(os.path.exists(path2))
+        self.assertTrue(os.path.exists(path3))
+
+        # confirm all results are empty
+        self.assertEqual(ret1, u'')
+        self.assertEqual(ret2, u'')
+        self.assertEqual(ret3, u'')
+
+        with open(path1, 'rb') as f:
+            out1 = f.read()
+        with open(path2, 'rb') as f:
+            out2 = f.read()
+        with open(path3, 'rb') as f:
+            out3 = f.read()
+        # confirm results are all identical
+        self.assertEqual(out1, out2)
+        self.assertEqual(out2, out3)
+
+        enc = detect_mecab_enc()
+        out = do_mecab(u'赤巻紙青巻紙')
+        self.assertEqual(out, out1.decode(enc))
+        self.assertTrue(len(out) > 0)
+
+        # clean up
+        os.remove(path1)
+        os.remove(path2)
+        os.remove(path3)
+        # make sure they don't exist anymore
+        self.assertFalse(os.path.exists(path1))
+        self.assertFalse(os.path.exists(path2))
+        self.assertFalse(os.path.exists(path3))
+
+        # when both -o and outpath assigned
+        # should get warning, and only outpath used
+        with warnings.catch_warnings(record=True) as w:
+            ret4 = do_mecab(u'赤巻紙青巻紙', '-o', path2, outpath=path1)
+            self.assertEqual(len(w), 1) 
+        self.assertTrue(os.path.exists(path1))
+        self.assertFalse(os.path.exists(path2))
+        with open(path1, 'rb') as f:
+            out4 = f.read()
+        self.assertEqual(out1, out4)
+
 
 class TestDomecabVec(unittest.TestCase):
     def test_vec(self):
@@ -61,63 +121,6 @@ class TestDomecabVec(unittest.TestCase):
         out = do_mecab_vec(ins, '-Owakati')
         split = out.strip().split('\n')
         self.assertEqual(len(split), 2, out)
-
-    def test_large_input(self):
-        enc = detect_mecab_enc()
-        x = u'すもももももももものうち!'
-        bx = len(x.encode(enc))
-        # repeat this until it is over 20000 bytes
-        tgt = 20000
-        rep = int(tgt / bx + 1)
-        y = x * rep  
-        by = len(y.encode(enc))
-
-        # make sure that the computation above works for all platform
-        self.assertTrue(by > tgt)
-        
-        # option "auto" should set the input buffer size 
-        # so entire string is regarded as a "sentense"
-        out = do_mecab_vec([y], '-Owakati', buffer_size='auto')
-        eos = re.findall(r'\n', out)
-        self.assertEqual(len(eos), 1, 'length of out should equal 1')
-        # make sure that entire strings are parsed by testing the
-        # number of '!' is equal to rep
-        num = re.findall(r'!', out)
-        self.assertEqual(len(num), rep)
-
-        # if we set the buffer size larger than the input, 
-        # then we should get the same result as 'auto'
-        out1 = do_mecab_vec([y], '-Owakati', buffer_size=by+1)
-        out2 = do_mecab_vec([y], '-Owakati', buffer_size=by+2)
-        self.assertEqual(out, out1)
-        self.assertEqual(out, out2)
-        
-        # if we set the buffer size smaller or equal, 
-        # we should get truncated outcome with a warning
-        with warnings.catch_warnings(record=True) as w:
-            out3 = do_mecab_vec([y], '-Owakati', buffer_size=by)
-            self.assertEqual(len(w), 1)
-        with warnings.catch_warnings(record=True) as w:
-            out4 = do_mecab_vec([y], '-Owakati', buffer_size=by-1)
-            self.assertEqual(len(w), 1)
-
-        eos = re.findall(r'\n', out3)
-        self.assertEqual(len(eos), 1, 'length of out3 should equal 1')
-        eos = re.findall(r'\n', out4)
-        self.assertEqual(len(eos), 1, 'length of out4 should equal 1')
-        self.assertNotEqual(out, out3)
-        self.assertNotEqual(out, out4)
-        self.assertNotEqual(out3, out4)
-        
-        # if we don't set buffer size, then we will use the default value,
-        # 8192. Since this is smaller than this input size, we expect warning,
-        # but still outcome length is one, but truncated
-        with warnings.catch_warnings(record=True) as w:
-            out5 = do_mecab_vec([y], '-Owakati')
-            self.assertEqual(len(w), 1)
-        eos = re.findall(r'\n', out5)
-        self.assertEqual(len(eos), 1, 'length of out5 should equal 1')
-        self.assertNotEqual(out, out5)
 
 
 class TestDomecabIter(unittest.TestCase):
@@ -212,7 +215,99 @@ class TestDomecabIter(unittest.TestCase):
         out = list(do_mecab_iter(ins, '-Owakati', byline=True))
         self.assertEqual(len(out), 2, out)
         
+
+class TestLargeInput(unittest.TestCase):
+
     def test_large_input(self):
+        enc = detect_mecab_enc()
+        x = u'すもももももももものうち!'
+        bx = len(x.encode(enc))
+        # repeat this until it is over 20000 bytes
+        tgt = 20000
+        rep = int(tgt / bx + 1)
+        y = x * rep  
+        by = len(y.encode(enc))
+
+        # make sure that the computation above works for all platform
+        self.assertTrue(by > tgt)
+        
+        # test combination of (auto_buffer_size, truncate)
+        # - True, True: correctly parsed 
+        # - True, False: correctly parsed
+        # - False, True: gets warning, result truncated
+        # - False, False: gets warning, result has extra EOS
+        out1 = do_mecab_vec([y], '-Owakati', auto_buffer_size=True, truncate=True)
+        out2 = do_mecab_vec([y], '-Owakati', auto_buffer_size=True, truncate=False)
+        with warnings.catch_warnings(record=True) as w:
+            out3 = do_mecab_vec([y], '-Owakati', auto_buffer_size=False, truncate=True)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=True')
+        with warnings.catch_warnings(record=True) as w:
+            out4 = do_mecab_vec([y], '-Owakati', auto_buffer_size=False, truncate=False)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False')
+
+        # test of result length
+        def num_eos(out): 
+            return len(re.findall(r'\n', out))
+        self.assertEqual(num_eos(out1), 1)
+        self.assertEqual(num_eos(out2), 1)
+        self.assertEqual(num_eos(out3), 1)
+        self.assertTrue(num_eos(out4) > 1)
+
+        # test of truncation
+        def num_exclam(out):
+            return len(re.findall(r'!', out))
+        self.assertEqual(num_exclam(out1), rep)
+        self.assertEqual(num_exclam(out2), rep)
+        self.assertTrue(num_exclam(out3) < rep)
+        #self.assertEqual(num_exclam(out4), rep)  
+        # what happens with truncation is ambiguous
+
+        # test of mannual -b option
+        # if we set enough buffer size level, we should be fine
+        out5 = do_mecab_vec([y], '-Owakati', '-b', str(by+1), 
+                            auto_buffer_size=False, truncate=True)
+        out6 = do_mecab_vec([y], '-Owakati', '-b', str(by+1), 
+                            auto_buffer_size=False, truncate=False)
+        self.assertEqual(num_eos(out5), 1)
+        self.assertEqual(num_eos(out6), 1)
+        self.assertEqual(num_exclam(out5), rep)
+        self.assertEqual(num_exclam(out6), rep)
+
+        # if the buffer size is small, we should get warning
+        with warnings.catch_warnings(record=True) as w:
+            out7 = do_mecab_vec([y], '-Owakati', '-b', str(by),
+                                auto_buffer_size=False, truncate=True)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=True, -b small')
+        with warnings.catch_warnings(record=True) as w:
+            out8 = do_mecab_vec([y], '-Owakati', '-b', str(by),
+                                auto_buffer_size=False, truncate=False)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False, -b small')
+        self.assertEqual(num_eos(out7), 1)
+        self.assertTrue(num_eos(out8) > 1)
+        self.assertTrue(num_exclam(out7) < rep)
+        #self.assertEqual(num_exclam(out8), rep)  
+
+        # if we set -b option and auto_buffer_size together,
+        # we should get warning and we will use the auto size
+        with warnings.catch_warnings(record=True) as w:
+            out9 = do_mecab_vec([y], '-Owakati', '-b', str(by+100),
+                                auto_buffer_size=True)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False, -b small')
+        self.assertEqual(num_eos(out9), 1)
+        self.assertEqual(num_exclam(out7), rep)
+        
+        # result equality
+        self.assertEqual(out1, out2)
+        self.assertEqual(out1, out5)
+        self.assertEqual(out1, out6)
+        self.assertEqual(out1, out9)
+        # and inequality
+        self.assertNotEqual(out1, out3)
+        self.assertNotEqual(out1, out4)
+        self.assertNotEqual(out1, out7)
+        self.assertNotEqual(out1, out8)
+
+    def test_large_input_iter(self):
         enc = detect_mecab_enc()
         x = u'隣の客はよく柿食う客かな?'
         bx = len(x.encode(enc))
@@ -221,56 +316,15 @@ class TestDomecabIter(unittest.TestCase):
         rep = int(tgt / bx + 1)
         y = x * rep  
         by = len(y.encode(enc))
-
         # make sure that the computation above works for all platform
         self.assertTrue(by > tgt)
         
-        # option "auto" should set the input buffer size 
-        # so entire string is regarded as a "sentense"
-        out = do_mecab_iter([y], '-Owakati', byline=True, buffer_size='auto')
-        out = list(out)
-        self.assertEqual(len(out), 1, 'length of out should equal 1')
-        # make sure that entire strings are parsed by testing the
-        # number of '?' is equal to rep
-        num = re.findall(r'\?', out[0])
-        self.assertEqual(len(num), rep)
-
-        # if we set the buffer size larger than the input, 
-        # then we should get the same result as 'auto'
-        out1 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by+1)
+        out1 = do_mecab_iter(
+            [y], '-Owakati', byline=True, auto_buffer_size=True, truncate=True)
         out1 = list(out1)
-        out2 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by+2)
+        out2 = do_mecab_iter(
+            [y], '-Owakati', byline=True, auto_buffer_size=True, truncate=False)
         out2 = list(out2)
-        self.assertEqual(out, out1)
-        self.assertEqual(out, out2)
-        
-        # if we set the buffer size smaller or equal, 
-        # we should get truncated outcome with a warning
-        with warnings.catch_warnings(record=True) as w:
-            out3 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by)
-            out3 = list(out3)
-            self.assertEqual(len(w), 1)
-        with warnings.catch_warnings(record=True) as w:
-            out4 = do_mecab_iter([y], '-Owakati', byline=True, buffer_size=by-1)
-            out4 = list(out4)
-            self.assertEqual(len(w), 1)
-
-        self.assertEqual(len(out3), 1, 'length of out3 should equal 1')
-        self.assertEqual(len(out4), 1, 'length of out4 should equal 1')
-        self.assertNotEqual(out, out3)
-        self.assertNotEqual(out, out4)
-        self.assertNotEqual(out3, out4)
-        
-        # if we don't set buffer size, then we will use the default value,
-        # 8192. Since this is smaller than this input size, we expect warning,
-        # but still outcome length is one, but truncated
-        with warnings.catch_warnings(record=True) as w:
-            out5 = do_mecab_iter([y], '-Owakati', byline=True)
-            out5 = list(out5)
-            self.assertEqual(len(w), 1)
-        self.assertEqual(len(out), 1, 'length of out5 should equal 1')
-        self.assertNotEqual(out, out5)
-
 
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):

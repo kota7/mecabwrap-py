@@ -45,15 +45,18 @@ def do_mecab(x, *args, **kwargs):
     if not mecab_exists():
         print(_no_mecab_message())
         return u''
-        
-        
+
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
     
+    opt = get_mecab_opt('-o', *args)
+    if opt and outpath:
+        logger.warn('both -o and outpath given, outpath is used')
+        warnings.warn('both -o and outpath given, outpath is used')
+
     # detect enc
     if mecab_enc is None:
         mecab_enc = detect_mecab_enc(*args)
-
 
     if sys.version_info[0] == 2:
         assert isinstance(x, unicode), "x must be unicode string"
@@ -103,10 +106,11 @@ def do_mecab_vec(x, *args, **kwargs):
                       - outpath (default: None) : if None, outcome is returned;
                         otherwise, outcome is written to the file
                       - mecab_enc (default: None) : encoding of mecab
-                      - buffer_size (default: None): if None, default value
-                        is used for `--input-buffer-size` option; if 'auto,
-                        necessary buffer size is chosen. if integer, it is
-                        used as the option
+                      - auto_buffer_size (default: False): if True,
+                        adjust buffer size to the necessary size
+                      - truncate (default: False): if True,
+                        input longer than the buffer size is truncated,
+                        so that the output length is preserved
  
     :return:          result of mecab call in unicode string
     """
@@ -118,7 +122,8 @@ def do_mecab_vec(x, *args, **kwargs):
 
     outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
-    buffer_size = kwargs.pop('buffer_size', None)
+    auto_buffer_size = kwargs.pop('auto_buffer_size', False)
+    truncate = kwargs.pop('truncate', False)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
@@ -126,22 +131,28 @@ def do_mecab_vec(x, *args, **kwargs):
 
     # set "-b" option
     max_input_size = max(len(a.encode(mecab_enc)) for a in x)
-    if buffer_size is None:
-        bopt = None 
-    elif buffer_size == 'auto':
-        bopt = max_input_size + 1
-        logger.debug('bopt is set to %d', bopt)
-    elif isinstance(buffer_size, int):
-        bopt = buffer_size
+    if auto_buffer_size:
+        bopt_auto = max_input_size + 1
+        logger.debug('bopt is automatically set to %d', bopt_auto)
     else:
-        logger.warning(
-            'unknown buffer_size option %s; bopt is set to None', buffer_size)
-        bopt = None 
+        bopt_auto = None
+    # check if -b option is given
+    bopt_given = get_mecab_opt('-b')
+    
+    if bopt_given and bopt_auto:
+        # both given, used the auto one
+        logger.warn('`-b` is auto-adjucted from %d to %d', 
+                    bopt_given, bopt_auto)
+        warning.warn('`-b` is auto-adjucted from %d to %d' % \
+                    (bopt_given, bopt_auto))
 
     default_buff_size = 8192
     maximum_buff_size = 8192 * 640
-    # bopt_ is same as bopt, except it has default value instead of None
-    bopt_ = bopt if bopt else default_buff_size
+    # bopt_ is the buffer size to be used
+    bopt_ = bopt_auto if bopt_auto else \
+            bopt_given if bopt_given else \
+            default_buff_size
+
     if bopt_ > maximum_buff_size:
         logger.warn('%d is truncated to maximum possible buffer size (%d)',
                     bopt_, maximum_buff_size)
@@ -152,31 +163,31 @@ def do_mecab_vec(x, *args, **kwargs):
     if bopt_ <= max_input_size:
         logger.warn('buffer size (%d) <= max input size (%d)', 
                     bopt_, max_input_size)    
-        warnings.warn(
-            ('buffer size (%d) <= max input size (%d). ' + \
-             'some text will be truncated') % (bopt_, max_input_size))
+        mess = 'buffer size (%d) <= max input size (%d)' % (bopt_, max_input_size)
+        if truncate:
+            logger.warn('some input text will be truncated')
+            warnings.warn(mess + '\n some input text will be truncated')
+        else:
+            logger.warn('output may contain extra EOS')
+            warnings.warn(mess + '\n output may contain extra EOS')
     else:
         logger.debug('buffer size (%d) > max input size (%d)', 
                      bopt_, max_input_size)    
 
-
     # write x to a temp file
-    # this is slightly faster when input size gets large
+    # this is slightly faster than passing input as is
+    # when input size is very large
     fd, infile = mkstemp()
     with open(infile, "wb") as f:
-        # truncate text
         xb = [a.replace('\n', ' ').encode(mecab_enc) for a in x] 
-        xb = [a[0:(bopt_ - 1)] for a in xb]
+        if truncate:
+            xb = [a[0:(bopt_ - 1)] for a in xb]
         txt = b'\n'.join(xb) + b'\n'
         f.write(txt)
 
-    if bopt:
-        args = list(args) + ['-b', str(bopt)]
-        out = do_mecab(
-            u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
-    else:
-        out = do_mecab(
-            u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
+    if bopt_auto:
+        args = list(args) + ['-b', str(bopt_auto)]
+    out = do_mecab(u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
 
     # make sure the temp file is removed    
     os.close(fd)
@@ -202,10 +213,11 @@ def do_mecab_iter(x, *args, **kwargs):
                         the returned generator yields one line at at time;
                         otherwise, it yields a chunk up to 'EOS' at a time
                       - mecab_enc (default: None) : encoding of mecab
-                      - buffer_size (default: None): if None, default value
-                        is used for `--input-buffer-size` option; if 'auto,
-                        necessary buffer size is chosen. if integer, it is
-                        used as the option
+                      - auto_buffer_size (default: False): if True,
+                        adjust buffer size to the necessary size
+                      - truncate (default: False): if True,
+                        input longer than the buffer size is truncated,
+                        so that the output length is preserved
 
     :return:          generator of mecab outcomes
     """
@@ -217,7 +229,6 @@ def do_mecab_iter(x, *args, **kwargs):
 
     byline    = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)
-    buffer_size = kwargs.pop('buffer_size', None)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
@@ -233,7 +244,7 @@ def do_mecab_iter(x, *args, **kwargs):
     
     args = list(args) + ['-E', EOS_tmp + '\n']
     do_mecab_vec(
-        x, *args, outpath=ofile, mecab_enc=mecab_enc, buffer_size=buffer_size)
+        x, *args, outpath=ofile, mecab_enc=mecab_enc, **kwargs)
 
 
     with open(ofile, 'rb') as f:
