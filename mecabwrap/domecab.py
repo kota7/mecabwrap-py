@@ -169,7 +169,9 @@ def do_mecab_vec(x, *args, **kwargs):
         else:
             logger.warn('output would contain extra EOS')
             mess = 'buffer size (%d) <= max input size (%d)' % (bopt_, max_input_size)
-            warnings.warn('output would contain extra EOS, due to size overflow')
+            warnings.warn(
+                'output would contain extra EOS, due to size overflow (%d >= %d)' % \
+                (max_input_size, bopt_))
     else:
         logger.debug('buffer size (%d) > max input size (%d), which is safe', 
                      bopt_, max_input_size)    
