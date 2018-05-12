@@ -90,7 +90,6 @@ def do_mecab(x, *args, **kwargs):
         out, err = p.communicate((x + u'\n').encode(mecab_enc))
     else:
         out, err = p.communicate()
-    
     #p.terminate()
     
     return out.decode(mecab_enc, 'ignore')
@@ -154,24 +153,25 @@ def do_mecab_vec(x, *args, **kwargs):
             default_buff_size
 
     if bopt_ > maximum_buff_size:
+        # fatal, cannot set this large buffer size
         logger.warn('%d is truncated to maximum possible buffer size (%d)',
                     bopt_, maximum_buff_size)
         warnings.warn('%d is truncated to maximum possible buffer size (%d)' % \
                       (bopt_, maximum_buff_size))
         bopt_ = maximum_buff_size
         
+    # logging by the size situation
     if bopt_ <= max_input_size:
-        logger.warn('buffer size (%d) <= max input size (%d)', 
-                    bopt_, max_input_size)    
-        mess = 'buffer size (%d) <= max input size (%d)' % (bopt_, max_input_size)
+        logger.info(
+            'buffer size (%d) <= max input size (%d)', bopt_, max_input_size)    
         if truncate:
-            logger.warn('some input text will be truncated')
-            warnings.warn(mess + '\n some input text will be truncated')
+            logger.info('some input text would be truncated')
         else:
-            logger.warn('output may contain extra EOS')
-            warnings.warn(mess + '\n output may contain extra EOS')
+            logger.warn('output would contain extra EOS')
+            mess = 'buffer size (%d) <= max input size (%d)' % (bopt_, max_input_size)
+            warnings.warn('output would contain extra EOS, due to size overflow')
     else:
-        logger.debug('buffer size (%d) > max input size (%d)', 
+        logger.debug('buffer size (%d) > max input size (%d), which is safe', 
                      bopt_, max_input_size)    
 
     # write x to a temp file

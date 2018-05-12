@@ -238,9 +238,7 @@ class TestLargeInput(unittest.TestCase):
         # - False, False: gets warning, result has extra EOS
         out1 = do_mecab_vec([y], '-Owakati', auto_buffer_size=True, truncate=True)
         out2 = do_mecab_vec([y], '-Owakati', auto_buffer_size=True, truncate=False)
-        with warnings.catch_warnings(record=True) as w:
-            out3 = do_mecab_vec([y], '-Owakati', auto_buffer_size=False, truncate=True)
-            self.assertEqual(len(w), 1, 'auto=False, trunc=True')
+        out3 = do_mecab_vec([y], '-Owakati', auto_buffer_size=False, truncate=True)
         with warnings.catch_warnings(record=True) as w:
             out4 = do_mecab_vec([y], '-Owakati', auto_buffer_size=False, truncate=False)
             self.assertEqual(len(w), 1, 'auto=False, trunc=False')
@@ -274,10 +272,8 @@ class TestLargeInput(unittest.TestCase):
         self.assertEqual(num_exclam(out6), rep)
 
         # if the buffer size is small, we should get warning
-        with warnings.catch_warnings(record=True) as w:
-            out7 = do_mecab_vec([y], '-Owakati', '-b', str(by),
-                                auto_buffer_size=False, truncate=True)
-            self.assertEqual(len(w), 1, 'auto=False, trunc=True, -b small')
+        out7 = do_mecab_vec([y], '-Owakati', '-b', str(by),
+                            auto_buffer_size=False, truncate=True)
         with warnings.catch_warnings(record=True) as w:
             out8 = do_mecab_vec([y], '-Owakati', '-b', str(by),
                                 auto_buffer_size=False, truncate=False)
@@ -325,11 +321,9 @@ class TestLargeInput(unittest.TestCase):
         out2 = do_mecab_iter(
             [y], '-Owakati', byline=True, auto_buffer_size=True, truncate=False)
         out2 = list(out2)
-        with warnings.catch_warnings(record=True) as w:
-            out3 = do_mecab_iter(
-                [y], '-Owakati', byline=True, auto_buffer_size=False, truncate=True)
-            out3 = list(out3)
-            self.assertEqual(len(w), 1, 'auto=False, trunc=True')
+        out3 = do_mecab_iter(
+            [y], '-Owakati', byline=True, auto_buffer_size=False, truncate=True)
+        out3 = list(out3)
         with warnings.catch_warnings(record=True) as w:
             out4 = do_mecab_iter(
                 [y], '-Owakati', byline=True, auto_buffer_size=False, truncate=False)
@@ -365,11 +359,9 @@ class TestLargeInput(unittest.TestCase):
         self.assertEqual(num_exclam(out6), rep)
 
         # if the buffer size is small, we should get warning
-        with warnings.catch_warnings(record=True) as w:
-            out7 = do_mecab_iter([y], '-Owakati', '-b', str(by), byline=True,
-                                 auto_buffer_size=False, truncate=True)
-            out7 = list(out7)
-            self.assertEqual(len(w), 1, 'auto=False, trunc=True, -b small')
+        out7 = do_mecab_iter([y], '-Owakati', '-b', str(by), byline=True,
+                             auto_buffer_size=False, truncate=True)
+        out7 = list(out7)
         with warnings.catch_warnings(record=True) as w:
             out8 = do_mecab_iter([y], '-Owakati', '-b', str(by), byline=True,
                                  auto_buffer_size=False, truncate=False)
