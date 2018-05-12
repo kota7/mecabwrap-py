@@ -11860,7 +11860,7 @@ It returns a generator of tokens.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">mecabwrap</span> <span class="k">import</span> <span class="n">tokenize</span>
@@ -11917,7 +11917,7 @@ See <a href="http://taku910.github.io/mecab/format.html">the official site</a> f
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">mecabwrap</span> <span class="k">import</span> <span class="n">do_mecab</span>
@@ -11961,7 +11961,7 @@ Note that <code>-F</code> option configures the outcome formatting.</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">mecabwrap</span> <span class="k">import</span> <span class="n">do_mecab_vec</span>
@@ -12011,7 +12011,7 @@ When <code>byline=False</code>, chunks are separated by <code>EOS</code>; hence 
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">mecabwrap</span> <span class="k">import</span> <span class="n">do_mecab_iter</span>
@@ -12120,7 +12120,7 @@ When <code>byline=False</code>, chunks are separated by <code>EOS</code>; hence 
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">do_mecab</span><span class="p">(</span><span class="s1">&#39;すもももももももものうち&#39;</span><span class="p">,</span> <span class="s1">&#39;-osumomo1.txt&#39;</span><span class="p">)</span>
@@ -12180,7 +12180,7 @@ EOS
 
 <div class="output_area">
 
-<div class="prompt output_prompt">Out[33]:</div>
+<div class="prompt output_prompt">Out[5]:</div>
 
 
 
@@ -12189,6 +12189,171 @@ EOS
 <pre>False</pre>
 </div>
 
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Very-Long-Input-and-Buffer-Size">Very Long Input and Buffer Size<a class="anchor-link" href="#Very-Long-Input-and-Buffer-Size">&#182;</a></h3><p>When input text is longer than the input buffer size (default: 8192), MeCab automatically split it into two "sentences", by inserting an extra EOS (and a few letters are lost around the separation point).
+As a result, <code>do_mecab_vec</code> and <code>do_mecab_iter</code> might produce output of length longer than the input.</p>
+<p>The functions provide two workaround for this (<code>v0.2.3</code> or later):</p>
+<ol>
+<li>If the option <code>auto_buffer_size</code> is <code>True</code>, the <code>input-buffer-size</code> option is automatically adjusted to the level as large as covering all input text.  Note that it won't work when the input size exceeds the MeCab's maximum buffer size, <code>8192 * 640</code> ~ 5MB.</li>
+<li>If the option <code>trancate</code> is <code>True</code>, input text is truncated so that they are convered by the input buffer size.</li>
+</ol>
+<p>Note that <code>do_mecab</code> does not have these features.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="s1">&#39;すもももももももものうち!&#39;</span> <span class="o">*</span> <span class="mi">225</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;input buffer size =&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">encode</span><span class="p">()))</span>
+
+<span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+    <span class="n">res1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">do_mecab_iter</span><span class="p">([</span><span class="n">x</span><span class="p">]))</span>
+<span class="c1"># the text is split into two since it exceeds the input buffer size</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output length =&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res1</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;***</span><span class="se">\n</span><span class="s1">End of the first element&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">150</span><span class="p">:])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;***</span><span class="se">\n</span><span class="s1">Beginning of the second element&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res1</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">150</span><span class="p">])</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>output would contain extra EOS
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>input buffer size = 8325
+output length = 2
+***
+End of the first element
+モ,モモ
+の	助詞,連体化,*,*,*,*,の,ノ,ノ
+うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+!	名詞,サ変接続,*,*,*,*,*
+すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+も	助詞,係助詞,*,*,*,*,も,モ,モ
+記号,一般,*,*,*,*,*
+EOS
+***
+Beginning of the second element
+記号,一般,*,*,*,*,*
+もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+の	助詞,連体化,*,*,*,*,の,ノ,ノ
+うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+!	名詞,サ変接続,*,*,*,*,*
+すもも	名詞,一般
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">re</span>
+
+<span class="n">res2</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">do_mecab_iter</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">auto_buffer_size</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output length =&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res2</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;***</span><span class="se">\n</span><span class="s1">End of the first element&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">150</span><span class="p">:])</span>
+
+<span class="c1"># count the number of &#39;!&#39;, to confirm all 223 repetitions are covered</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of &quot;!&quot; =&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res2</span><span class="p">))))</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="n">res3</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">do_mecab_iter</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="n">truncate</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;output length =&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">res3</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;***</span><span class="se">\n</span><span class="s1">End of the first element&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">res3</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">150</span><span class="p">:])</span>
+
+<span class="c1"># count the number of &#39;!&#39;, to confirm some are not covered due to trancation</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;number of &quot;!&quot; =&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;!&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">res3</span><span class="p">))))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>output length = 1
+***
+End of the first element
+も	名詞,一般,*,*,*,*,もも,モモ,モモ
+も	助詞,係助詞,*,*,*,*,も,モ,モ
+もも	名詞,一般,*,*,*,*,もも,モモ,モモ
+の	助詞,連体化,*,*,*,*,の,ノ,ノ
+うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+!	名詞,サ変接続,*,*,*,*,*
+EOS
+number of &#34;!&#34; = 225
+
+output length = 1
+***
+End of the first element
+モ,モモ
+の	助詞,連体化,*,*,*,*,の,ノ,ノ
+うち	名詞,非自立,副詞可能,*,*,*,うち,ウチ,ウチ
+!	名詞,サ変接続,*,*,*,*,*
+すもも	名詞,一般,*,*,*,*,すもも,スモモ,スモモ
+も	助詞,係助詞,*,*,*,*,も,モ,モ
+記号,一般,*,*,*,*,*
+EOS
+number of &#34;!&#34; = 221
+</pre>
+</div>
 </div>
 
 </div>
@@ -12208,7 +12373,7 @@ In python3, <code>str</code> type is unicode, so <code>u''</code> and <code>''</
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">o1</span> <span class="o">=</span> <span class="n">do_mecab</span><span class="p">(</span><span class="s1">&#39;すもももももももものうち&#39;</span><span class="p">)</span>   <span class="c1"># this works only for python 3</span>
@@ -12268,7 +12433,7 @@ EOS
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># show mecab dict</span>
@@ -12316,6 +12481,19 @@ EOS
 </div>
 </div>
 
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+</div>
 </div>
 </div>
 
