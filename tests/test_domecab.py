@@ -260,7 +260,7 @@ class TestLargeInput(unittest.TestCase):
         self.assertEqual(num_exclam(out2), rep)
         self.assertTrue(num_exclam(out3) < rep)
         #self.assertEqual(num_exclam(out4), rep)  
-        # what happens with truncation is ambiguous
+        # what happens is ambiguous
 
         # test of mannual -b option
         # if we set enough buffer size level, we should be fine
@@ -290,11 +290,11 @@ class TestLargeInput(unittest.TestCase):
         # if we set -b option and auto_buffer_size together,
         # we should get warning and we will use the auto size
         with warnings.catch_warnings(record=True) as w:
-            out9 = do_mecab_vec([y], '-Owakati', '-b', str(by+100),
+            out9 = do_mecab_vec([y], '-Owakati', '-b', str(by+1),
                                 auto_buffer_size=True)
             self.assertEqual(len(w), 1, 'auto=False, trunc=False, -b small')
         self.assertEqual(num_eos(out9), 1)
-        self.assertEqual(num_exclam(out7), rep)
+        self.assertEqual(num_exclam(out9), rep)
         
         # result equality
         self.assertEqual(out1, out2)
@@ -325,6 +325,82 @@ class TestLargeInput(unittest.TestCase):
         out2 = do_mecab_iter(
             [y], '-Owakati', byline=True, auto_buffer_size=True, truncate=False)
         out2 = list(out2)
+        with warnings.catch_warnings(record=True) as w:
+            out3 = do_mecab_iter(
+                [y], '-Owakati', byline=True, auto_buffer_size=False, truncate=True)
+            out3 = list(out3)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=True')
+        with warnings.catch_warnings(record=True) as w:
+            out4 = do_mecab_iter(
+                [y], '-Owakati', byline=True, auto_buffer_size=False, truncate=False)
+            out4 = list(out4)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False')
+
+        # test of result length
+        self.assertEqual(len(out1), 1)
+        self.assertEqual(len(out2), 1)
+        self.assertEqual(len(out3), 1)
+        self.assertTrue(len(out4) > 1)
+
+        # test of truncation
+        def num_exclam(out):
+            return len(re.findall(r'\?', ''.join(out)))
+        self.assertEqual(num_exclam(out1), rep)
+        self.assertEqual(num_exclam(out2), rep)
+        self.assertTrue(num_exclam(out3) < rep)
+        #self.assertEqual(num_exclam(out4), rep)  
+        # what happens is ambiguous
+
+        # test of mannual -b option
+        # if we set enough buffer size level, we should be fine
+        out5 = do_mecab_iter([y], '-Owakati', '-b', str(by+1), byline=True,
+                             auto_buffer_size=False, truncate=True)
+        out5 = list(out5)
+        out6 = do_mecab_iter([y], '-Owakati', '-b', str(by+1), byline=True, 
+                             auto_buffer_size=False, truncate=False)
+        out6 = list(out6)
+        self.assertEqual(len(out5), 1)
+        self.assertEqual(len(out6), 1)
+        self.assertEqual(num_exclam(out5), rep)
+        self.assertEqual(num_exclam(out6), rep)
+
+        # if the buffer size is small, we should get warning
+        with warnings.catch_warnings(record=True) as w:
+            out7 = do_mecab_iter([y], '-Owakati', '-b', str(by), byline=True,
+                                 auto_buffer_size=False, truncate=True)
+            out7 = list(out7)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=True, -b small')
+        with warnings.catch_warnings(record=True) as w:
+            out8 = do_mecab_iter([y], '-Owakati', '-b', str(by), byline=True,
+                                 auto_buffer_size=False, truncate=False)
+            out8 = list(out8)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False, -b small')
+        self.assertEqual(len(out7), 1)
+        self.assertTrue(len(out8) > 1)
+        self.assertTrue(num_exclam(out7) < rep)
+        #self.assertEqual(num_exclam(out8), rep)  
+
+        # if we set -b option and auto_buffer_size together,
+        # we should get warning and we will use the auto size
+        with warnings.catch_warnings(record=True) as w:
+            out9 = do_mecab_iter([y], '-Owakati', '-b', str(by+1), byline=True,
+                                 auto_buffer_size=True)
+            out9 = list(out9)
+            self.assertEqual(len(w), 1, 'auto=False, trunc=False, -b small')
+        self.assertEqual(len(out9), 1)
+        self.assertEqual(num_exclam(out9), rep)
+        
+        # result equality
+        self.assertEqual(out1, out2)
+        self.assertEqual(out1, out5)
+        self.assertEqual(out1, out6)
+        self.assertEqual(out1, out9)
+        # and inequality
+        self.assertNotEqual(out1, out3)
+        self.assertNotEqual(out1, out4)
+        self.assertNotEqual(out1, out7)
+        self.assertNotEqual(out1, out8)
+
 
 class TestMultipleOptions(unittest.TestCase):
     def test_multiple_options(self):

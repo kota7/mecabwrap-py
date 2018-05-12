@@ -137,13 +137,13 @@ def do_mecab_vec(x, *args, **kwargs):
     else:
         bopt_auto = None
     # check if -b option is given
-    bopt_given = get_mecab_opt('-b')
+    bopt_given = get_mecab_opt('-b', *args)
     
     if bopt_given and bopt_auto:
         # both given, used the auto one
         logger.warn('`-b` is auto-adjucted from %d to %d', 
                     bopt_given, bopt_auto)
-        warning.warn('`-b` is auto-adjucted from %d to %d' % \
+        warnings.warn('`-b` is auto-adjucted from %d to %d' % \
                     (bopt_given, bopt_auto))
 
     default_buff_size = 8192
