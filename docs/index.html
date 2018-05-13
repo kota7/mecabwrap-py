@@ -12201,10 +12201,10 @@ EOS
 <div class="text_cell_render border-box-sizing rendered_html">
 <h3 id="Very-Long-Input-and-Buffer-Size">Very Long Input and Buffer Size<a class="anchor-link" href="#Very-Long-Input-and-Buffer-Size">&#182;</a></h3><p>When input text is longer than the input buffer size (default: 8192), MeCab automatically split it into two "sentences", by inserting an extra EOS (and a few letters are lost around the separation point).
 As a result, <code>do_mecab_vec</code> and <code>do_mecab_iter</code> might produce output of length longer than the input.</p>
-<p>The functions provide two workaround for this (<code>v0.2.3</code> or later):</p>
+<p>The functions provide two workarounds for this (<code>v0.2.3</code> or later):</p>
 <ol>
 <li>If the option <code>auto_buffer_size</code> is <code>True</code>, the <code>input-buffer-size</code> option is automatically adjusted to the level as large as covering all input text.  Note that it won't work when the input size exceeds the MeCab's maximum buffer size, <code>8192 * 640</code> ~ 5MB.</li>
-<li>If the option <code>trancate</code> is <code>True</code>, input text is truncated so that they are convered by the input buffer size.</li>
+<li>If the option <code>trancate</code> is <code>True</code>, input text is truncated so that they are covered by the input buffer size.</li>
 </ol>
 <p>Note that <code>do_mecab</code> does not have these features.</p>
 
@@ -12481,19 +12481,6 @@ EOS
 </div>
 </div>
 
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-</div>
 </div>
 </div>
 
