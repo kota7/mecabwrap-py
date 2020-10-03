@@ -74,8 +74,6 @@ have MeCab installed or MeCab is not on the search path.
     $ mecab -v
     # should print `mecab of 0.996` or similar.
 
-    $ mecab-config --version
-    # should print `0.996` or similar.
 
 To verify that the package is successfully installed, try the following:
 

@@ -62,6 +62,13 @@ def find_dictionary(dictionary):
     logger.debug("checking existence of `%s`", dictionary)
     if os.path.isdir(dictionary):
         return os.path.abspath(dictionary)
+    
+    # we need mecab-config to find the default directory location
+    if not mecab_config_exists():
+        logger.warning("mecab-config is not found." + \
+                       "please provide the path to the dictionary directory")
+        logger.debug("`%s` is not a valid path" % dictionary)                       
+        return None
     # check if the directory exists under the mecab's default directory
     dictionary2 = os.path.join(get_mecab_dicdir(), dictionary)
     logger.debug("checking existence of `%s`", dictionary2)
