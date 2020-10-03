@@ -99,4 +99,4 @@ To verify that the package is successfully installed, try the following:
 Usage
 -----
 
-Visit the `example page <https://nbviewer.jupyter.org/github/kota7/mecabwrap-py/blob/master/notebook/mecabwrap%20-%20Python%20Interface%20to%20MeCab%20for%20Unix%20and%20Windows.ipynb>`__ for more detail.
+Visit the `example notebook <https://github.com/kota7/mecabwrap-py/blob/master/notebook/mecabwrap%20-%20Python%20Interface%20to%20MeCab%20for%20Unix%20and%20Windows.ipynb>`__ for more detail.
