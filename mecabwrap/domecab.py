@@ -253,16 +253,20 @@ def do_mecab_iter(x, *args, **kwargs):
         print(_no_mecab_message())
         return
 
-    opt = get_mecab_opt('-o', *args)
-    if opt:
-        raise ValueError("`-o` option is not allowed for `do_mecab_iter`")
-
     byline = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)
+    outpath = kwargs.pop('outpath', None)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
         mecab_enc = detect_mecab_enc(*args)
+
+    opt = get_mecab_opt('-o', *args)
+    if opt:
+        raise ValueError("`-o` option is not supported for `do_mecab_iter`")
+    if outpath:
+        raise ValueError("`outpath` option is not supported for `do_mecab_iter`")
+
 
     # make a temp file for writing output
     fd, ofile = mkstemp()
