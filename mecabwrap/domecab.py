@@ -51,7 +51,7 @@ def do_mecab(x, *args, **kwargs):
     
     opt = get_mecab_opt('-o', *args)
     if opt and outpath:
-        logger.warn('both -o and outpath given, outpath is used')
+        logger.warning('both -o and outpath given, outpath is used')
         warnings.warn('both -o and outpath given, outpath is used')
 
     # detect enc
@@ -140,7 +140,7 @@ def do_mecab_vec(x, *args, **kwargs):
     
     if bopt_given and bopt_auto:
         # both given, used the auto one
-        logger.warn('`-b` is auto-adjucted from %d to %d', 
+        logger.warning('`-b` is auto-adjucted from %d to %d', 
                     bopt_given, bopt_auto)
         warnings.warn('`-b` is auto-adjucted from %d to %d' % \
                     (bopt_given, bopt_auto))
@@ -154,7 +154,7 @@ def do_mecab_vec(x, *args, **kwargs):
 
     if bopt_ > maximum_buff_size:
         # fatal, cannot set this large buffer size
-        logger.warn('%d is truncated to maximum possible buffer size (%d)',
+        logger.warning('%d is truncated to maximum possible buffer size (%d)',
                     bopt_, maximum_buff_size)
         warnings.warn('%d is truncated to maximum possible buffer size (%d)' % \
                       (bopt_, maximum_buff_size))
@@ -167,7 +167,7 @@ def do_mecab_vec(x, *args, **kwargs):
         if truncate:
             logger.info('some input text would be truncated')
         else:
-            logger.warn('output would contain extra EOS')
+            logger.warning('output would contain extra EOS')
             mess = 'buffer size (%d) <= max input size (%d)' % (bopt_, max_input_size)
             warnings.warn(
                 'output would contain extra EOS, due to size overflow (%d >= %d)' % \
@@ -180,6 +180,7 @@ def do_mecab_vec(x, *args, **kwargs):
     # this is slightly faster than passing input as is
     # when input size is very large
     fd, infile = mkstemp()
+    logger.debug("Temporary input file: %s", infile)
     with open(infile, "wb") as f:
         xb = [a.replace('\n', ' ').encode(mecab_enc) for a in x] 
         if truncate:
@@ -238,7 +239,8 @@ def do_mecab_iter(x, *args, **kwargs):
 
     # make a temp file for writing output
     fd, ofile = mkstemp()
-
+    logger.debug("Temporary output file %s:", ofile)
+    
     # use temporary eos
     EOS = get_mecab_opt('-E', *args)
     EOS = 'EOS' if EOS is None else EOS.strip()
