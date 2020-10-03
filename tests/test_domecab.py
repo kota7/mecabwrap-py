@@ -9,7 +9,7 @@ import tempfile
 import types
 import warnings
 from mecabwrap.domecab import do_mecab, do_mecab_vec, do_mecab_iter
-from mecabwrap.utils import detect_mecab_enc
+from mecabwrap.utils import detect_mecab_enc, find_dictionary
 
 
 class TestDomecab(unittest.TestCase):
@@ -80,13 +80,13 @@ class TestDomecab(unittest.TestCase):
         self.assertFalse(os.path.exists(path3))
 
         # when both -o and outpath assigned
-        # should get warning, and only outpath used
+        # should get warning, and outpath is ignored
         with warnings.catch_warnings(record=True) as w:
             ret4 = do_mecab(u'赤巻紙青巻紙', '-o', path2, outpath=path1)
             self.assertEqual(len(w), 1) 
-        self.assertTrue(os.path.exists(path1))
-        self.assertFalse(os.path.exists(path2))
-        with open(path1, 'rb') as f:
+        self.assertTrue(os.path.exists(path2))
+        self.assertFalse(os.path.exists(path1))
+        with open(path2, 'rb') as f:
             out4 = f.read()
         self.assertEqual(out1, out4)
 
@@ -402,7 +402,25 @@ class TestMultipleOptions(unittest.TestCase):
         self.assertEqual(out[0], 'begin')
         self.assertEqual(out[-1], 'end')
 
- 
+
+class TestDictionary(unittest.TestCase):
+    def test_ipadic_nelogd(self):
+        dictionary = "mecab-ipadic-neologd"
+        if find_dictionary(dictionary):
+            res = do_mecab(u"メロンパンを食べたい", dictionary=dictionary)
+            # neologd combines melon and pan
+            self.assertTrue(res.find(u"メロンパン") == 0, res)
+
+    def test_ipadic_nelogd(self):
+        dictionary = "mecab-unidic-neologd"
+        if find_dictionary(dictionary):
+            res = do_mecab(u"しまっておいたメロンパン", dictionary=dictionary)
+            self.assertTrue(res.find(u"メロンパン") >= 0, res)
+            # unidic provide normalized kanji expression for some words
+            self.assertTrue(res.find(u"仕舞う") >= 0, res)
+            self.assertTrue(res.find(u"置く") >= 0, res)
+
+
 if __name__ == '__main__':
     unittest.main()
 

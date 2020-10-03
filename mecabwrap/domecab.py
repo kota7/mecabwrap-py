@@ -9,7 +9,7 @@ import codecs
 import warnings
 from tempfile import mkstemp
 from .config import get_mecab
-from .utils import mecab_exists, detect_mecab_enc
+from .utils import mecab_exists, detect_mecab_enc, find_dictionary
 from .utils import _no_mecab_message, get_mecab_opt
 
 logger = getLogger(__name__)
@@ -18,6 +18,11 @@ logger = getLogger(__name__)
 if not mecab_exists():
     print(_no_mecab_message())
 
+
+
+# note: I use **kwargs instead of explicit keyword arguments
+#       because older versions of python does not allow
+#       explicit keyword arguments follow *args.
 
 
 def do_mecab(x, *args, **kwargs):
@@ -46,13 +51,26 @@ def do_mecab(x, *args, **kwargs):
         print(_no_mecab_message())
         return u''
 
-    outpath   = kwargs.pop('outpath', None)
-    mecab_enc = kwargs.pop('mecab_enc', None)
+    outpath    = kwargs.pop('outpath', None)
+    mecab_enc  = kwargs.pop('mecab_enc', None)
+    dictionary = kwargs.pop('dictionary', None)
     
     opt = get_mecab_opt('-o', *args)
     if opt and outpath:
-        logger.warning('both -o and outpath given, outpath is used')
-        warnings.warn('both -o and outpath given, outpath is used')
+        logger.warning('both `-o` and `outpath` are given, `outpath` is ignored')
+        warnings.warn('both `-o` and `outpath` are given, `outpath` is ignored')
+        outpath = None
+        
+    dic = get_mecab_opt('-d', *args)
+    if dic and dictionary:
+        logger.warning('both -d and dictionary are given, dictionary is ignored')
+        warnings.warn('both -d and dictionary are given, dictionary is ignored')
+        dictionary = None
+    if dictionary:
+        dictionary = find_dictionary(dictionary)
+        assert dictionary is not None, ("dictionary `%s` not found" % dictionary)
+        logger.debug("Dicationary found: `%s`" % dictionary)
+        
 
     # detect enc
     if mecab_enc is None:
@@ -63,9 +81,13 @@ def do_mecab(x, *args, **kwargs):
         assert outpath is None or \
                isinstance(outpath, str) or \
                isinstance(outpath, unicode) 
+        assert dictionary is None or \
+               isinstance(dictionary, str) or \
+               isinstance(dictionary, unicode) 
     else:
         assert isinstance(x, str), "x must be string"
         assert outpath is None or isinstance(outpath, str)
+        assert dictionary is None or isinstance(dictionary, str)
     
     # conduct mecab if outfile is not None, 
     # then write it to the file;
@@ -73,6 +95,8 @@ def do_mecab(x, *args, **kwargs):
     command = [get_mecab()] + list(args)
     if outpath is not None:
         command += ["-o", outpath]
+    if dictionary is not None:
+        command += ["-d", dictionary]
     
     # for python 2.x, mecab_enc <> utf8,
     # args with unicode raise UnicodeEncodeError
@@ -119,7 +143,7 @@ def do_mecab_vec(x, *args, **kwargs):
         print(_no_mecab_message())
         return u''
 
-    outpath   = kwargs.pop('outpath', None)
+    #outpath   = kwargs.pop('outpath', None)
     mecab_enc = kwargs.pop('mecab_enc', None)
     auto_buffer_size = kwargs.pop('auto_buffer_size', False)
     truncate = kwargs.pop('truncate', False)
@@ -190,7 +214,7 @@ def do_mecab_vec(x, *args, **kwargs):
 
     if bopt_auto:
         args = list(args) + ['-b', str(bopt_auto)]
-    out = do_mecab(u'', infile, *args, outpath=outpath, mecab_enc=mecab_enc)
+    out = do_mecab(u'', infile, *args, mecab_enc=mecab_enc, **kwargs)
 
     # make sure the temp file is removed    
     os.close(fd)
@@ -200,7 +224,6 @@ def do_mecab_vec(x, *args, **kwargs):
     # this is faster when input size is small
     #y = '\n'.join(a.replace('\n', ' ') for a in x) 
     #out = do_mecab(y, *args, outpath=outpath, mecab_enc=mecab_enc)
-
     
     return out
 
@@ -230,7 +253,11 @@ def do_mecab_iter(x, *args, **kwargs):
         print(_no_mecab_message())
         return
 
-    byline    = kwargs.pop('byline', False)
+    opt = get_mecab_opt('-o', *args)
+    if opt:
+        raise ValueError("`-o` option is not allowed for `do_mecab_iter`")
+
+    byline = kwargs.pop('byline', False)
     mecab_enc = kwargs.pop('mecab_enc', None)
 
     # detect dictionary encoding if not given

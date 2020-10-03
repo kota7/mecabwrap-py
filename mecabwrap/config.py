@@ -2,7 +2,8 @@
 
 
 __config = dict(
-    mecab = "mecab"
+    mecab = "mecab",
+    mecab_config = "mecab-config"
 )
 
 
@@ -21,5 +22,12 @@ def get_mecab():
 def set_mecab(val):
     set_config("mecab", val)
 
+
+def get_mecab_config():
+    return get_config("mecab_config")
+
+
+def set_mecab_config(val):
+    set_config("mecab_config", val)
 
 
