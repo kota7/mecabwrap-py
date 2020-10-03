@@ -20,7 +20,7 @@ if not mecab_exists():
 
 
 
-def do_mecab(x, *args, outpath=None, mecab_enc=None):
+def do_mecab(x, *args, **kwargs):
     """
     call mecab
     
@@ -45,6 +45,9 @@ def do_mecab(x, *args, outpath=None, mecab_enc=None):
     if not mecab_exists():
         print(_no_mecab_message())
         return u''
+
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', None)
     
     opt = get_mecab_opt('-o', *args)
     if opt and outpath:
@@ -92,8 +95,7 @@ def do_mecab(x, *args, outpath=None, mecab_enc=None):
     return out.decode(mecab_enc, 'ignore')
 
 
-def do_mecab_vec(x, *args, outpath=None, mecab_enc=None,
-                 auto_buffer_size=False, truncate=False):
+def do_mecab_vec(x, *args, **kwargs):
     """
     call mecab with multiple inputs 
     
@@ -116,6 +118,11 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc=None,
     if not mecab_exists():
         print(_no_mecab_message())
         return u''
+
+    outpath   = kwargs.pop('outpath', None)
+    mecab_enc = kwargs.pop('mecab_enc', None)
+    auto_buffer_size = kwargs.pop('auto_buffer_size', False)
+    truncate = kwargs.pop('truncate', False)
 
     # detect dictionary encoding if not given
     if mecab_enc is None:
@@ -198,8 +205,7 @@ def do_mecab_vec(x, *args, outpath=None, mecab_enc=None,
     return out
 
 
-def do_mecab_iter(x, *args, mecab_enc=None,
-                  auto_buffer_size=False, truncate=False, byline=False):
+def do_mecab_iter(x, *args, **kwargs):
     """
     call mecab with multiple inputs and get results one by one
 
@@ -224,6 +230,9 @@ def do_mecab_iter(x, *args, mecab_enc=None,
         print(_no_mecab_message())
         return
 
+    byline    = kwargs.pop('byline', False)
+    mecab_enc = kwargs.pop('mecab_enc', None)
+
     # detect dictionary encoding if not given
     if mecab_enc is None:
         mecab_enc = detect_mecab_enc(*args)
@@ -238,11 +247,8 @@ def do_mecab_iter(x, *args, mecab_enc=None,
     EOS_tmp = '___TEMPORARYENDOFSENTENCE___'
     
     args = list(args) + ['-E', EOS_tmp + '\n']
-    do_mecab_vec(x, *args,
-                 outpath=ofile,
-                 mecab_enc=mecab_enc,
-                 auto_buffer_size=auto_buffer_size,
-                 truncate=truncate)
+    do_mecab_vec(
+        x, *args, outpath=ofile, mecab_enc=mecab_enc, **kwargs)
 
 
     with open(ofile, 'rb') as f:
