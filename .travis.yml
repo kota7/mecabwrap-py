@@ -15,7 +15,7 @@ os:
 
 # command to install dependencies
 before_install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install mecab libmecab-dev mecab-ipadic-utf8; git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git && echo yes | ./mecab-ipadic-neologd/bin/install-mecab-ipadic-neologd -n; fi
   #- if [ "$TRAVIS_OS_NAME" = "osx" ]  ; then brew install mecab mecab-ipadic; fi  
   
 install:
