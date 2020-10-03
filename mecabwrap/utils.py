@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 
-
+import os
 import sys
 import subprocess
 import re
 import argparse
-from .config import get_mecab
+from logging import getLogger
+from .config import get_mecab, get_mecab_config
 
+logger = getLogger(__name__)
 
 def mecab_exists():
     """
-    detect if mecab command exists
+    check if mecab command exists
     
-    :return: True or False
+    :return: bool
     """
     
-    command = [get_mecab(), "-v"] 
+    command = [get_mecab(), "-v"]
     try:
         p = subprocess.Popen(command, stdout=subprocess.PIPE)
     except OSError:
@@ -27,6 +29,67 @@ def mecab_exists():
     return (reg is not None)
 
 
+def mecab_config_exists():
+    """
+    check if mecab-config command exists
+    
+    :return: bool
+    """
+    command = [get_mecab_config(), "--version"]
+    try:
+        p = subprocess.Popen(command, stdout=subprocess.PIPE)
+    except OSError:
+        return False
+
+    out, err = p.communicate()
+    out = out.decode().strip()
+    logger.debug("Result of `mecab-config --version`: %s", out)
+    reg  = re.match(r'[\d\.]+', out)
+    return (reg is not None)
+
+
+def find_dictionary(dictionary):
+    """
+    find dictionary path
+    
+    :param dictionary:  Either the path to the dictionary directory
+                        or sub-directory name under the mecab's dicdir
+    
+    :return:  string of the full path to the dictionary directory
+              or None if dictionary not found
+    """
+    # check if this is already a valid path to a directory
+    logger.debug("checking existence of `%s`", dictionary)
+    if os.path.isdir(dictionary):
+        return os.path.abspath(dictionary)
+    
+    # we need mecab-config to find the default directory location
+    if not mecab_config_exists():
+        logger.warning("mecab-config is not found." + \
+                       "please provide the path to the dictionary directory")
+        logger.debug("`%s` is not a valid path" % dictionary)                       
+        return None
+    # check if the directory exists under the mecab's default directory
+    dictionary2 = os.path.join(get_mecab_dicdir(), dictionary)
+    logger.debug("checking existence of `%s`", dictionary2)
+    if os.path.isdir(dictionary2):
+        return os.path.abspath(dictionary2)
+    # not found
+    logger.debug("Neither `%s` nor `%s` is a valid path" % (dictionary, dictionary2))
+    return None
+
+def get_mecab_dicdir():
+    """
+    detect the mecab's default dictionary directory
+    
+    :return:  string
+    """
+    assert mecab_config_exists(), "`%s` not found" % get_mecab_config()
+    command = [get_mecab_config(), '--dicdir']
+    p = subprocess.Popen(command, stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    out = out.decode().strip()
+    return out
 
 def detect_mecab_enc(*args):
     """

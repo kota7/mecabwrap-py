@@ -18,7 +18,7 @@ Its goal is to provide intuitive APIs that work on Unix and Windows machines sea
 Requirement
 -----------
 
--  Python 2.6+ or 3.3+
+-  Python 2.7+ or 3.4+ (May also work on older versions)
 -  MeCab 0.996
 
 Installation
@@ -72,7 +72,8 @@ have MeCab installed or MeCab is not on the search path.
 .. code:: bash
 
     $ mecab -v
-    # should result in `mecab of 0.996` or similar.
+    # should print `mecab of 0.996` or similar.
+
 
 To verify that the package is successfully installed, try the following:
 
@@ -98,4 +99,4 @@ To verify that the package is successfully installed, try the following:
 Usage
 -----
 
-Visit the `project page <https://kota7.github.io/mecabwrap-py/>`__ for more detail.
+Visit the `example page <https://nbviewer.jupyter.org/github/kota7/mecabwrap-py/blob/master/notebook/mecabwrap%20-%20Python%20Interface%20to%20MeCab%20for%20Unix%20and%20Windows.ipynb>`__ for more detail.
