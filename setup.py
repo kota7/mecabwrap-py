@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+import os
+readmefile = os.path.join(os.path.dirname(__file__), "README.rst")
+with open(readmefile) as f:
+    readme = f.read()
 
 setup(
     name='mecabwrap',
-    version='0.3.0',
+    version='0.3.1',
     description='Yet another interface to MeCab morphological analyzer',
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
     url='https://github.com/kota7/mecabwrap-py',
     download_url='https://github.com/kota7/mecabwrap-py/archive/0.1.5.tar.gz',
+    long_description=readme,
 
     packages=['mecabwrap'],
     install_requires=[],
