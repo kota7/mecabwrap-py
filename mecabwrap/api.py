@@ -22,10 +22,13 @@ Token = namedtuple("Token", [
     ,"lemma_reading"  # goiso reading
 ])
 
-def print_token(token):
+def str_token(token):
     fmt = u"%s\t" + u",".join([u"%s"] * (len(token)-1))    
-    print(fmt % tuple(["*" if t is None else t for t in token]))
+    return fmt % tuple([u"*" if t is None else t for t in token])
 
+def print_token(token):
+    print(str_token(token))
+    
 def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
                      format_func=None, pos_filter=None, filter_func=None):
     # todo: choose separaters that do not appear in x
