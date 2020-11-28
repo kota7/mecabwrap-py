@@ -107,5 +107,8 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     if userdic is not None:
         opts += ['-u', userdic]
         
-    res = mecab_batch([x], *opts, mecab_enc=mecab_enc)[0]
-    return res
+    res = mecab_batch([x], *opts, mecab_enc=mecab_enc)
+    if len(res) > 0:
+        return res[0]
+    else:
+        return []
