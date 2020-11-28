@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+import os
+readmefile = os.path.join(os.path.dirname(__file__), "README.rst")
+with open(readmefile) as f:
+    readme = f.read()
 
 setup(
     name='mecabwrap',
-    version='0.3.1',
+    version='0.3.2dev',
     description='Yet another interface to MeCab morphological analyzer',
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
     url='https://github.com/kota7/mecabwrap-py',
     download_url='https://github.com/kota7/mecabwrap-py/archive/0.1.5.tar.gz',
+    long_description=readme,
 
     packages=['mecabwrap'],
     install_requires=[],
@@ -32,12 +37,14 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2.6',
+        #'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.3',
+        #'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6'        
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
     ],
     test_suite='tests'
 )
