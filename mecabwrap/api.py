@@ -3,8 +3,10 @@
 
 import sys
 from collections import namedtuple
+from logging import getLogger
 from .domecab import do_mecab, do_mecab_iter
 
+logger = getLogger(__name__)
 
 Token = namedtuple("Token", [
     "surface"
@@ -28,9 +30,11 @@ def str_token(token):
 
 def print_token(token):
     print(str_token(token))
-    
+
+
 def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
-                     format_func=None, pos_filter=None, filter_func=None):
+                     format_func=None, pos_filter=None, filter_func=None,
+                     separators=None):
     """
     Tokenize a batch of strings
 
@@ -43,12 +47,34 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
     :param format_func:    function Token->Any to parse token
     :param pos_filter:     list of part-of-speeches to keep
     :param filter_func:    function Token->bool to filter tokens
+    :param separators:     Strings or length 2. (token_sep, info_sep).
+                           These should be strings that do not appear in data.
+                           If None, automatically chosen from unicode upto 100
 
     :return:               generator of list of tokens
-    """    
-    # todo: choose separaters that do not appear in x
-    tokensep = chr(1)
-    infosep = chr(2)
+    """
+    def _find_safe_separators(x, n=2):
+        seps = []
+        for i in range(1, 100):
+            if len(seps) >= n:
+                logger.debug("Chosen separators: %s (decimal code %s)",
+                             seps[0:n], [ord(s) for s in seps])
+                return seps[0:n]
+            candidate = chr(i)
+            flg = True
+            for a in x:
+                if a.find(candidate) >= 0:
+                    flg = False
+                    break
+            if flg:
+                seps.append(candidate)
+        logger.error("Could not find a good separators")
+        raise ValueError("Could not find a good separators." + \
+                         "Please explicitly specify `separators=(tokensep, infosep)`.")
+    if separators is None:
+        tokensep, infosep = _find_safe_separators(x, n=2)
+    else:
+        tokensep, infosep = separators
     
     if unidic_format is None and \
         (dictionary is not None and dictionary.find("unidic") >= 0):
@@ -96,7 +122,8 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
         yield tokens 
 
 def mecab_batch(x, dictionary=None, mecab_enc=None, unidic_format=None,
-                format_func=None, pos_filter=None, filter_func=None):
+                format_func=None, pos_filter=None, filter_func=None,
+                separators=None):
     """
     Tokenize a batch of strings
 
@@ -109,12 +136,16 @@ def mecab_batch(x, dictionary=None, mecab_enc=None, unidic_format=None,
     :param format_func:    function Token->Any to parse token
     :param pos_filter:     list of part-of-speeches to keep
     :param filter_func:    function Token->bool to filter tokens
+    :param separators:     Strings or length 2. (token_sep, info_sep).
+                           These should be strings that do not appear in data.
+                           If None, automatically chosen from unicode upto 100
 
     :return:               list of list of tokens
     """
     return list(mecab_batch_iter(
         x, dictionary=dictionary, mecab_enc=mecab_enc, unidic_format=unidic_format,
-        format_func=format_func, pos_filter=pos_filter, filter_func=filter_func))
+        format_func=format_func, pos_filter=pos_filter, filter_func=filter_func,
+        separators=separators))
 
 
 class MecabTokenizer:

@@ -86,5 +86,13 @@ class TestBatch(unittest.TestCase):
             for c, d in zip(a, b):
                 self.assertEqual(c, d, msg=u"`{}` v `{}`".format(c, d))
 
+    def test_auto_separators(self):
+        x = [u"テスト" + chr(1) + u"です" + chr(2),
+             chr(2) + u"文頭のケース",
+             u"文末のケース" + chr(2),
+             u"文中" + chr(1) + "のケース"]
+        y = mecab_batch(x)
+        self.assertEqual(len(y), 4)
+
 if __name__ == '__main__':
     unittest.main()
