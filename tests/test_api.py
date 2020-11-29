@@ -90,7 +90,7 @@ class TestBatch(unittest.TestCase):
         x = [u"テスト" + chr(1) + u"です" + chr(2),
              chr(2) + u"文頭のケース",
              u"文末のケース" + chr(2),
-             u"文中" + chr(1) + "のケース"]
+             u"文中" + chr(1) + u"のケース"]
         y = mecab_batch(x)
         self.assertEqual(len(y), 4)
 
