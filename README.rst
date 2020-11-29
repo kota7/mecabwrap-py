@@ -83,9 +83,9 @@ To verify that the package is successfully installed, try the following:
 
 .. code:: python
 
-    >>> from mecabwrap import tokenize
+    >>> from mecabwrap import tokenize, print_token
     >>> for token in tokenize(u"すもももももももものうち"): 
-    ...     print(token)
+    ...     print_token(token)
     ... 
     すもも 名詞,一般,*,*,*,*,すもも,スモモ,スモモ
     も   助詞,係助詞,*,*,*,*,も,モ,モ
