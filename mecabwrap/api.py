@@ -31,6 +31,21 @@ def print_token(token):
     
 def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
                      format_func=None, pos_filter=None, filter_func=None):
+    """
+    Tokenize a batch of strings
+
+    :param x:              list of strings to parse
+    :param mecab_enc:      encoding mecab dictionary;
+                           if None, automatically detected
+    :param dictionary:     system dictionary directory
+                           folder name is allowed if it is in mecab's dicdir
+    :param unidic_format:  bool indicating if the dictionary is in unidic format
+    :param format_func:    function Token->Any to parse token
+    :param pos_filter:     list of part-of-speeches to keep
+    :param filter_func:    function Token->bool to filter tokens
+
+    :return:               generator of list of tokens
+    """    
     # todo: choose separaters that do not appear in x
     tokensep = chr(1)
     infosep = chr(2)
@@ -82,10 +97,75 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
 
 def mecab_batch(x, dictionary=None, mecab_enc=None, unidic_format=None,
                 format_func=None, pos_filter=None, filter_func=None):
+    """
+    Tokenize a batch of strings
+
+    :param x:              list of strings to parse
+    :param mecab_enc:      encoding mecab dictionary;
+                           if None, automatically detected
+    :param dictionary:     system dictionary directory
+                           folder name is allowed if it is in mecab's dicdir
+    :param unidic_format:  bool indicating if the dictionary is in unidic format
+    :param format_func:    function Token->Any to parse token
+    :param pos_filter:     list of part-of-speeches to keep
+    :param filter_func:    function Token->bool to filter tokens
+
+    :return:               list of list of tokens
+    """
     return list(mecab_batch_iter(
         x, dictionary=dictionary, mecab_enc=mecab_enc, unidic_format=unidic_format,
         format_func=format_func, pos_filter=pos_filter, filter_func=filter_func))
 
+
+class MecabTokenizer:
+    def __init__(self, dictionary=None, mecab_enc=None, unidic_format=None,
+                 format_func=None, pos_filter=None, filter_func=None,
+                 return_generator=False):
+        self.dictionary = dictionary
+        self.mecab_enc = mecab_enc
+        self.unidic_format = unidic_format
+        self.format_func = format_func
+        self.pos_filter = pos_filter
+        self.filter_func = filter_func
+        self.return_generator = return_generator
+    """
+    Scikit-learn compatible tokenizer for a batch of strings
+
+    :param mecab_enc:        encoding mecab dictionary;
+                             if None, automatically detected
+    :param dictionary:       system dictionary directory
+                             folder name is allowed if it is in mecab's dicdir
+    :param unidic_format:    bool indicating if the dictionary is in unidic format
+    :param format_func:      function Token->Any to parse token
+    :param pos_filter:       list of part-of-speeches to keep
+    :param filter_func:      function Token->bool to filter tokens
+    :param return_generator: bool indicating if transformer should return a generator
+                             if false, returns a list
+    """
+    def fit_transform(self, X, y=None, **fit_params):
+        return self.transform(X)
+    
+    def fit(self, X, y=None):
+        # there is nothing to fit
+        return self
+    
+    def transform(self, X):
+        if self.return_generator:
+            return mecab_batch_iter(X,
+                                    dictionary=self.dictionary,
+                                    mecab_enc=self.mecab_enc,
+                                    unidic_format=self.unidic_format,
+                                    format_func=self.format_func,
+                                    pos_filter=self.pos_filter,
+                                    filter_func=self.filter_func)
+        else:
+            return mecab_batch(X,
+                               dictionary=self.dictionary,
+                               mecab_enc=self.mecab_enc,
+                               unidic_format=self.unidic_format,
+                               format_func=self.format_func,
+                               pos_filter=self.pos_filter,
+                               filter_func=self.filter_func)
 
 def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     """

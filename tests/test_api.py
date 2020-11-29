@@ -4,7 +4,7 @@
 import unittest
 import types
 import sys
-from mecabwrap.api import tokenize, str_token, mecab_batch, mecab_batch_iter, Token
+from mecabwrap.api import tokenize, str_token, mecab_batch, mecab_batch_iter, Token, MecabTokenizer
 
 
 class TestTokenize(unittest.TestCase):
@@ -15,15 +15,6 @@ class TestTokenize(unittest.TestCase):
             words, 
             [u'すもも', u'も', u'もも', u'も', u'もも', u'の', u'うち']
          )
-
-    def test_print_str(self):
-        """
-        print(token) should give str in both in python2 and 3
-        """
-        tokens = tokenize(u'すもももももももものうち')
-        for token in tokens:
-            s = str_token(token)
-            self.assertTrue(isinstance(s, str))
 
 class TestBatch(unittest.TestCase):
     def test_batch(self):
@@ -73,6 +64,27 @@ class TestBatch(unittest.TestCase):
             self.assertEqual(len(a), len(b))
             for c, d in zip(a, b):
                 self.assertEqual(c, d, msg=u"`{}` v `{}`".format(c, d))
-        
+
+    def test_tokenizer(self):
+        x = [u"明日は晴れるかな", u"雨なら読書をしよう"]
+        tokenizer = MecabTokenizer(format_func=lambda x: x.surface)
+        y = tokenizer.transform(x)
+        self.assertEqual(type(y), list)
+        z = [[u"明日", u"は", u"晴れる", u"か", u"な"],
+             [u"雨", u"なら", u"読書", u"を", u"しよ", u"う"]]
+        for a, b in zip(y, z):
+            for c, d in zip(a, b):
+                self.assertEqual(c, d, msg=u"`{}` v `{}`".format(c, d))
+
+        tokenizer = MecabTokenizer(format_func=lambda x: x.surface,
+                                   return_generator=True)
+        y = tokenizer.transform(x)
+        self.assertEqual(type(y), types.GeneratorType)
+        z = [[u"明日", u"は", u"晴れる", u"か", u"な"],
+             [u"雨", u"なら", u"読書", u"を", u"しよ", u"う"]]
+        for a, b in zip(y, z):
+            for c, d in zip(a, b):
+                self.assertEqual(c, d, msg=u"`{}` v `{}`".format(c, d))
+
 if __name__ == '__main__':
     unittest.main()
