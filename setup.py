@@ -8,7 +8,7 @@ with open(readmefile) as f:
 
 setup(
     name='mecabwrap',
-    version='0.3.3',
+    version='0.3.4',
     description='Yet another interface to MeCab morphological analyzer',
     author='Kota Mori', 
     author_email='kmori05@gmail.com',
