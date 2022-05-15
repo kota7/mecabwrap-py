@@ -33,8 +33,8 @@ def print_token(token):
 
 
 def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
-                     format_func=None, pos_filter=None, filter_func=None,
-                     separators=None):
+                     format_func=None, pos_filter=None, filter_func=None, separators=None,
+                     **kwargs):
     """
     Tokenize a batch of strings
 
@@ -50,6 +50,7 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
     :param separators:     Strings or length 2. (token_sep, info_sep).
                            These should be strings that do not appear in data.
                            If None, automatically chosen from unicode upto 100
+    :param kwargs:         Optional arguments passed to do_mecab_iter.
 
     :return:               generator of list of tokens
     """
@@ -108,7 +109,8 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
         raise ValueError()
 
     for doc in do_mecab_iter(x, "-E ", out_format, unk_format,
-                             dictionary=dictionary, mecab_enc=mecab_enc):
+                             dictionary=dictionary, mecab_enc=mecab_enc,
+                             **kwargs):
         lines = doc.split(tokensep)
         tokens = [_to_token(line) for line in lines]
         tokens = [t for t in tokens if t is not None]
@@ -122,8 +124,8 @@ def mecab_batch_iter(x, dictionary=None, mecab_enc=None, unidic_format=None,
         yield tokens 
 
 def mecab_batch(x, dictionary=None, mecab_enc=None, unidic_format=None,
-                format_func=None, pos_filter=None, filter_func=None,
-                separators=None):
+                format_func=None, pos_filter=None, filter_func=None, separators=None,
+                **kwargs):
     """
     Tokenize a batch of strings
 
@@ -139,19 +141,20 @@ def mecab_batch(x, dictionary=None, mecab_enc=None, unidic_format=None,
     :param separators:     Strings or length 2. (token_sep, info_sep).
                            These should be strings that do not appear in data.
                            If None, automatically chosen from unicode upto 100
+    :param kwargs:         Optional arguments passed to do_mecab_iter.
 
     :return:               list of list of tokens
     """
     return list(mecab_batch_iter(
         x, dictionary=dictionary, mecab_enc=mecab_enc, unidic_format=unidic_format,
         format_func=format_func, pos_filter=pos_filter, filter_func=filter_func,
-        separators=separators))
+        separators=separators, **kwargs))
 
 
 class MecabTokenizer:
     def __init__(self, dictionary=None, mecab_enc=None, unidic_format=None,
                  format_func=None, pos_filter=None, filter_func=None,
-                 return_generator=False):
+                 return_generator=False, **kwargs):
         self.dictionary = dictionary
         self.mecab_enc = mecab_enc
         self.unidic_format = unidic_format
@@ -159,6 +162,7 @@ class MecabTokenizer:
         self.pos_filter = pos_filter
         self.filter_func = filter_func
         self.return_generator = return_generator
+        self.kwargs = kwargs
     """
     Scikit-learn compatible tokenizer for a batch of strings
 
@@ -172,6 +176,7 @@ class MecabTokenizer:
     :param filter_func:      function Token->bool to filter tokens
     :param return_generator: bool indicating if transformer should return a generator
                              if false, returns a list
+    :param kwargs:           Optional arguments passed to do_mecab_iter.
     """
     def fit_transform(self, X, y=None, **fit_params):
         return self.transform(X)
@@ -188,7 +193,8 @@ class MecabTokenizer:
                                     unidic_format=self.unidic_format,
                                     format_func=self.format_func,
                                     pos_filter=self.pos_filter,
-                                    filter_func=self.filter_func)
+                                    filter_func=self.filter_func,
+                                    **self.kwargs)
         else:
             return mecab_batch(X,
                                dictionary=self.dictionary,
@@ -196,9 +202,10 @@ class MecabTokenizer:
                                unidic_format=self.unidic_format,
                                format_func=self.format_func,
                                pos_filter=self.pos_filter,
-                               filter_func=self.filter_func)
+                               filter_func=self.filter_func,
+                               **self.kwargs)
 
-def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
+def tokenize(x, mecab_enc=None, sysdic=None, userdic=None, **kwargs):
     """
     Tokenize a string 
 
@@ -207,8 +214,9 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
                       if None, automatically detected
     :param sysdic:    system dictionary directory
     :param userdic:   user dictionary file
+    :param kwargs:    Optional arguments passed to do_mecab_iter.
 
-    :return:    generator of tokens
+    :return:          List of tokens
     """
     
     # collect mecab options
@@ -218,7 +226,7 @@ def tokenize(x, mecab_enc=None, sysdic=None, userdic=None):
     if userdic is not None:
         opts += ['-u', userdic]
         
-    res = mecab_batch([x], *opts, mecab_enc=mecab_enc)
+    res = mecab_batch([x], *opts, mecab_enc=mecab_enc, **kwargs)
     if len(res) > 0:
         return res[0]
     else:
